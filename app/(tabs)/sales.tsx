@@ -16,7 +16,7 @@ export default function SalesScreen() {
         <View style={{ marginTop: Spacing.lg }}>
           <Text style={styles.heading1}>Sales</Text>
           <Text style={styles.bodySecondary}>
-            Welcome to your sales dashboard. Here you can process new sales and view transaction history.
+            Welcome to your sales page. Here you can process new sales and view transaction history.
           </Text>
         </View>
       </View>

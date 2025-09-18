@@ -1,9 +1,9 @@
-import { StyleSheet } from 'react-native';
-import { BorderRadius, Colors, Shadow, Spacing, Typography } from './tokens';
+import { StyleSheet } from "react-native";
+import { BorderRadius, Colors, Shadow, Spacing, Typography } from "./tokens";
 
-export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
+export const createStyles = (colorScheme: "light" | "dark" = "light") => {
   const colors = Colors[colorScheme];
-  
+
   return StyleSheet.create({
     // Container styles - centered and balanced
     container: {
@@ -17,12 +17,12 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
     },
     centerContainer: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       backgroundColor: colors.background,
       paddingHorizontal: Spacing.lg,
     },
-    
+
     // Modal styles - Full screen modals
     modalContainer: {
       flex: 1,
@@ -40,9 +40,9 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       paddingBottom: Spacing.lg,
     },
     modalHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       marginBottom: Spacing.lg,
       paddingBottom: Spacing.sm,
       borderBottomWidth: 1,
@@ -53,11 +53,11 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       height: 4,
       backgroundColor: colors.textTertiary,
       borderRadius: 2,
-      alignSelf: 'center',
+      alignSelf: "center",
       marginTop: Spacing.sm,
       marginBottom: Spacing.md,
     },
-    
+
     // Card styles - compact and balanced
     card: {
       backgroundColor: colors.surface,
@@ -73,27 +73,27 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       marginVertical: Spacing.sm,
       ...Shadow.md,
     },
-    
+
     // Button styles - compact with proper touch targets
     buttonPrimary: {
       backgroundColor: colors.primary,
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.lg,
       borderRadius: BorderRadius.lg,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       minHeight: 44, // Accessibility minimum
       ...Shadow.sm,
     },
     buttonSecondary: {
-      backgroundColor: 'transparent',
+      backgroundColor: "transparent",
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.lg,
       borderRadius: BorderRadius.lg,
       borderWidth: 1,
       borderColor: colors.border,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       minHeight: 44, // Accessibility minimum
     },
     buttonFilterCompact: {
@@ -103,10 +103,10 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       borderRadius: BorderRadius.md,
       borderWidth: 1,
       borderColor: colors.border,
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: 40, // Exact height to match inputCompact
-      width: 40, // Square button
+      alignItems: "center",
+      justifyContent: "center",
+      height: 48, // Updated to match inputCompact height
+      width: 48, // Adjusted width to maintain square appearance
     },
     buttonText: {
       color: colors.textInverse,
@@ -120,7 +120,10 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       fontWeight: Typography.weight.semibold,
       lineHeight: Typography.size.body * Typography.lineHeight.normal,
     },
-    
+
+    // Shadow styles
+    shadow: Shadow.sm,
+
     // Typography styles - compact scale
     heading1: {
       fontSize: Typography.size.h1,
@@ -167,7 +170,7 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       color: colors.textTertiary,
       lineHeight: Typography.size.caption * Typography.lineHeight.normal,
     },
-    
+
     // Input styles - compact and accessible
     input: {
       backgroundColor: colors.surface,
@@ -189,22 +192,22 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       paddingHorizontal: Spacing.md,
       fontSize: Typography.size.body,
       color: colors.text,
-      height: 40, // Exact height to match filter button
+      height: 48, // Increased height for better cursor visibility
     },
     inputFocused: {
       borderColor: colors.primary,
       ...Shadow.sm,
     },
-    
+
     // List styles - balanced spacing
     listItem: {
       backgroundColor: colors.surface,
       borderRadius: BorderRadius.lg,
       padding: Spacing.lg,
       marginVertical: Spacing.sm,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       minHeight: 44, // Accessibility minimum
       ...Shadow.sm,
     },
@@ -214,9 +217,9 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.lg,
       marginVertical: Spacing.xs,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       minHeight: 56, // Slightly larger for better touch experience
       ...Shadow.sm,
     },
@@ -224,11 +227,11 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       backgroundColor: colors.backgroundSecondary,
       transform: [{ scale: 0.98 }],
     },
-    
+
     // Empty state styles - centered
     emptyState: {
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       paddingVertical: Spacing.xl,
       paddingHorizontal: Spacing.lg,
     },
@@ -236,33 +239,33 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
       fontSize: Typography.size.bodyLarge,
       fontWeight: Typography.weight.medium,
       color: colors.textSecondary,
-      textAlign: 'center',
+      textAlign: "center",
       lineHeight: Typography.size.bodyLarge * Typography.lineHeight.relaxed,
     },
-    
+
     // Glass effect styles - subtle
     glassMorphism: {
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-      backdropFilter: 'blur(8px)',
+      backgroundColor: "rgba(255, 255, 255, 0.08)",
+      backdropFilter: "blur(8px)",
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderColor: "rgba(255, 255, 255, 0.1)",
     },
-    
+
     // Layout utility styles - centered and balanced
     flexRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
     },
     flexRowBetween: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
     },
     flexCenter: {
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
-    
+
     // Spacing utilities - compact scale
     marginTopSm: {
       marginTop: Spacing.sm,
@@ -282,25 +285,26 @@ export const createStyles = (colorScheme: 'light' | 'dark' = 'light') => {
     paddingVertical: {
       paddingVertical: Spacing.md,
     },
-    
+
     // Floating Action Button (FAB) styles
     fab: {
-      position: 'absolute',
+      position: "absolute",
       bottom: Spacing.xl,
       right: Spacing.lg,
       backgroundColor: colors.primary,
       width: 56,
       height: 56,
       borderRadius: 28,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 10,
       ...Shadow.lg,
     },
     fabPressed: {
       transform: [{ scale: 0.95 }],
       opacity: 0.9,
     },
-    
+
     // Interactive states for micro-interactions
     pressable: {
       borderRadius: BorderRadius.lg,

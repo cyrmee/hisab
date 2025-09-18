@@ -1,15 +1,19 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect } from "react";
+import "react-native-reanimated";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { useColorScheme } from '../hooks/use-color-scheme';
-import { initializeDatabase, testDatabase } from '../services/database';
+import { useColorScheme } from "../hooks/use-color-scheme";
+import { initializeDatabase, testDatabase } from "../services/database";
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: "(tabs)",
 };
 
 export default function RootLayout() {
@@ -18,18 +22,18 @@ export default function RootLayout() {
   useEffect(() => {
     const setupDatabase = async () => {
       try {
-        console.log('Testing database connection...');
+        console.log("Testing database connection...");
         const isWorking = testDatabase();
         if (!isWorking) {
-          console.error('Database test failed');
+          console.error("Database test failed");
           return;
         }
 
-        console.log('Initializing database...');
+        console.log("Initializing database...");
         await initializeDatabase();
-        console.log('Database setup completed');
+        console.log("Database setup completed");
       } catch (error) {
-        console.error('Database setup failed:', error);
+        console.error("Database setup failed:", error);
       }
     };
 
@@ -38,10 +42,21 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen
+            name="modal"
+            options={{ presentation: "modal", title: "Modal" }}
+          />
+          <Stack.Screen
+            name="search-filter"
+            options={{ presentation: "formSheet", title: "Search & Filter" }}
+          />
+          <Stack.Screen
+            name="product-form"
+            options={{ presentation: "formSheet", title: "Product Form" }}
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
