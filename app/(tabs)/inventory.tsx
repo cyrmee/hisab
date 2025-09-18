@@ -236,43 +236,6 @@ export default function InventoryScreen() {
               placeholder="Quick search products..."
               placeholderTextColor={colors.textTertiary}
             />
-
-            {/* Filter Button */}
-            <Link
-              href={{
-                pathname: "/search-filter",
-                params: {
-                  searchText: getCurrentFilters().searchText || "",
-                  minPrice: getCurrentFilters().minPrice?.toString() || "",
-                  maxPrice: getCurrentFilters().maxPrice?.toString() || "",
-                  minStock: getCurrentFilters().minStock?.toString() || "",
-                  maxStock: getCurrentFilters().maxStock?.toString() || "",
-                  sortBy: getCurrentFilters().sortBy || "createdAt",
-                  sortOrder: getCurrentFilters().sortOrder || "DESC",
-                },
-              }}
-              asChild
-            >
-              <TouchableOpacity
-                style={{
-                  width: 48,
-                  marginLeft: Spacing.xs,
-                  height: 48,
-                  backgroundColor: colors.primary,
-                  borderRadius: BorderRadius.lg,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  ...styles.shadow,
-                }}
-                activeOpacity={0.8}
-              >
-                <FontAwesome
-                  name="filter"
-                  size={16}
-                  color={colors.textInverse}
-                />
-              </TouchableOpacity>
-            </Link>
           </View>
 
           {/* Products List */}
