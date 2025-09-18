@@ -1,33 +1,57 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { HapticTab } from '../../components/haptic-tab';
+import { Colors } from '../../constants/tokens';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
+        tabBarStyle: {
+          backgroundColor: colors.tabBackground,
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom + 8,
+          paddingTop: 8,
+        },
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }}>
       <Tabs.Screen
-        name="index"
+        name="sales"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Sales',
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="usd" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="inventory"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Inventory',
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="list" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="erub"
+        options={{
+          title: 'Erub',
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="credit-card" color={color} />,
         }}
       />
     </Tabs>
