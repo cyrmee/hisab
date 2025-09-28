@@ -17,13 +17,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createStyles } from "../constants/styles";
 import { Colors, Spacing } from "../constants/tokens";
-import { useColorScheme } from "../hooks/use-color-scheme";
 import { Product, addProduct, updateProduct } from "../services/database";
 
 export default function ProductFormModal() {
-  const colorScheme = useColorScheme();
-  const styles = createStyles(colorScheme ?? "light");
-  const colors = Colors[colorScheme ?? "light"];
+  const styles = createStyles();
+  const colors = Colors.light;
   const params = useLocalSearchParams();
 
   // Parse product data from params

@@ -39,44 +39,6 @@ export const Colors = {
     tabInactive: '#94A3B8',
     tabBackground: 'rgba(255, 255, 255, 0.95)',
   },
-  dark: {
-    // Primary brand colors
-    primary: '#3B82F6',      // Blue 500
-    primaryLight: '#60A5FA', // Blue 400
-    primaryDark: '#2563EB',  // Blue 600
-    
-    // Secondary colors
-    secondary: '#10B981',     // Emerald 500
-    secondaryLight: '#34D399',// Emerald 400
-    secondaryDark: '#059669', // Emerald 600
-    
-    // Background colors - soft greys instead of pure black
-    background: '#111827',    // Gray 900 (softer than pure black)
-    backgroundSecondary: '#1F2937', // Gray 800
-    surface: '#1F2937',       // Gray 800
-    surfaceElevated: '#374151', // Gray 700
-    
-    // Text colors
-    text: '#F9FAFB',         // Gray 50
-    textSecondary: '#D1D5DB', // Gray 300
-    textTertiary: '#9CA3AF',  // Gray 400
-    textInverse: '#111827',   // Gray 900
-    
-    // Border colors
-    border: '#374151',       // Gray 700
-    borderSecondary: '#4B5563', // Gray 600
-    
-    // Status colors
-    success: '#10B981',      // Emerald 500
-    warning: '#F59E0B',      // Amber 500
-    error: '#EF4444',        // Red 500
-    info: '#3B82F6',         // Blue 500
-    
-    // Tab bar
-    tabActive: '#3B82F6',
-    tabInactive: '#6B7280',
-    tabBackground: 'rgba(17, 24, 39, 0.95)',
-  },
 };
 
 // Compact spacing scale: 4, 8, 12, 16, 24

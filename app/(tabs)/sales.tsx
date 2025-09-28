@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { Link, useFocusEffect } from 'expo-router';
 import React, { useState, useCallback } from 'react';
 import { 
   Text, 
@@ -9,13 +9,13 @@ import {
   Alert, 
   Modal,
   TextInput,
-  ScrollView
+  ScrollView,
+  Pressable
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createStyles } from '../../constants/styles';
-import { Spacing, Colors } from '../../constants/tokens';
-import { useColorScheme } from '../../hooks/use-color-scheme';
+import { BorderRadius, Spacing, Colors } from '../../constants/tokens';
 import { 
   getProducts, 
   getTransactions, 
@@ -71,9 +71,8 @@ function SalesItem({ item, onDelete, colors, styles }: SalesItemProps) {
 }
 
 export default function SalesScreen() {
-  const colorScheme = useColorScheme();
-  const styles = createStyles(colorScheme ?? 'light');
-  const colors = Colors[colorScheme ?? 'light'];
+  const styles = createStyles();
+  const colors = Colors.light;
 
   const [transactions, setTransactions] = useState<TransactionWithCustomer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -296,11 +295,11 @@ export default function SalesScreen() {
         </View>
 
         {/* Search Bar */}
-        <View style={{ marginBottom: Spacing.lg }}>
+        <View style={[styles.flexRow, { marginBottom: Spacing.lg }]}>
           <TextInput
             style={[
               styles.inputCompact,
-              { flex: 1 },
+              { flex: 1, marginRight: Spacing.sm },
             ]}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -337,7 +336,7 @@ export default function SalesScreen() {
         )}
       </View>
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button - Positioned above tab bar and content */}
       <View
         style={{
           position: "absolute",
@@ -345,11 +344,11 @@ export default function SalesScreen() {
           right: 20,
           zIndex: 9999,
 
-          // Circle styles on wrapper - matching inventory
+          // Circle styles on wrapper
           backgroundColor: colors.primary,
           width: 56,
           height: 56,
-          borderRadius: 28,
+          borderRadius: BorderRadius.lg,
           alignItems: "center",
           justifyContent: "center",
           shadowColor: colors.primary,
@@ -361,18 +360,26 @@ export default function SalesScreen() {
           borderColor: colors.primary,
         }}
       >
-        <TouchableOpacity
+        <Pressable
+          android_ripple={{ color: colors.primary, radius: 28 }}
+          style={({ pressed }) => [
+            {
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: BorderRadius.lg,
+            },
+            pressed && {
+              transform: [{ scale: 0.95 }],
+              opacity: 0.9,
+            },
+          ]}
           onPress={() => setShowSaleModal(true)}
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 28,
-          }}
-          activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel="Add sale"
         >
-          <FontAwesome name="plus" size={20} color={colors.textInverse} />
-        </TouchableOpacity>
+          <FontAwesome name="plus" size={15} color={colors.textInverse} />
+        </Pressable>
       </View>
 
       {/* Sale Modal */}
@@ -398,8 +405,23 @@ export default function SalesScreen() {
             <ScrollView 
               style={{ flex: 1 }} 
               showsVerticalScrollIndicator={false}
-              onTouchStart={() => setShowProductDropdown(false)}
             >
+              {/* Backdrop for closing dropdown */}
+              {showProductDropdown && (
+                <TouchableOpacity
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 999,
+                  }}
+                  onPress={() => setShowProductDropdown(false)}
+                  activeOpacity={1}
+                />
+              )}
+
               {/* Product Selection */}
               <View style={{ marginBottom: Spacing.lg }}>
                 <Text style={[styles.bodySecondary, { marginBottom: Spacing.xs }]}>

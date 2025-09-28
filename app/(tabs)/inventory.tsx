@@ -15,7 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createStyles } from "../../constants/styles";
 import { BorderRadius, Colors, Spacing } from "../../constants/tokens";
-import { useColorScheme } from "../../hooks/use-color-scheme";
 import { deleteProduct, getProducts, Product } from "../../services/database";
 import { getCurrentFilters } from "../../services/filter-store";
 
@@ -148,9 +147,8 @@ export default function InventoryScreen() {
   const [loading, setLoading] = useState(false);
   const [quickSearch, setQuickSearch] = useState("");
 
-  const colorScheme = useColorScheme();
-  const styles = createStyles(colorScheme ?? "light");
-  const colors = Colors[colorScheme ?? "light"];
+  const styles = createStyles();
+  const colors = Colors.light;
 
   const fetchProducts = React.useCallback(async () => {
     setLoading(true);

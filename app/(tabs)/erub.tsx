@@ -6,14 +6,15 @@ import {
   FlatList, 
   TouchableOpacity, 
   Alert,
-  RefreshControl
+  RefreshControl,
+  Modal,
+  TextInput
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 
 import { createStyles } from '../../constants/styles';
-import { Spacing, Colors, BorderRadius } from '../../constants/tokens';
-import { useColorScheme } from '../../hooks/use-color-scheme';
+import { Spacing, Colors, BorderRadius, Shadow } from '../../constants/tokens';
 import { 
   getCustomersWithBalance,
   updateCustomerBalance,
@@ -52,13 +53,15 @@ function CustomerItem({ item, onPayment, colors, styles }: CustomerItemProps) {
 }
 
 export default function CustomersScreen() {
-  const colorScheme = useColorScheme();
-  const styles = createStyles(colorScheme ?? 'light');
-  const colors = Colors[colorScheme ?? 'light'];
+  const styles = createStyles();
+  const colors = Colors.light;
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
 
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
@@ -86,50 +89,41 @@ export default function CustomersScreen() {
   );
 
   const handlePayment = (customer: Customer) => {
-    Alert.prompt(
-      'Payment',
-      `Enter payment amount for ${customer.name}\nOutstanding balance: $${customer.outstandingBalance.toFixed(2)}`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Record Payment', 
-          onPress: async (amount?: string) => {
-            if (!amount) return;
-            
-            const paymentAmount = parseFloat(amount);
-            if (isNaN(paymentAmount) || paymentAmount <= 0) {
-              Alert.alert('Error', 'Please enter a valid payment amount');
-              return;
-            }
-
-            if (paymentAmount > customer.outstandingBalance) {
-              Alert.alert(
-                'Warning', 
-                `Payment amount ($${paymentAmount.toFixed(2)}) is greater than outstanding balance ($${customer.outstandingBalance.toFixed(2)}). Continue?`,
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { 
-                    text: 'Continue', 
-                    onPress: async () => {
-                      await processPayment(customer, paymentAmount);
-                    }
-                  }
-                ]
-              );
-              return;
-            }
-
-            await processPayment(customer, paymentAmount);
-          }
-        }
-      ],
-      'plain-text',
-      '',
-      'numeric'
-    );
+    setSelectedCustomer(customer);
+    setPaymentAmount('');
+    setShowPaymentModal(true);
   };
 
-  const processPayment = async (customer: Customer, amount: number) => {
+  const processPayment = async () => {
+    if (!selectedCustomer) return;
+
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Error', 'Please enter a valid payment amount');
+      return;
+    }
+
+    if (amount > selectedCustomer.outstandingBalance) {
+      Alert.alert(
+        'Warning', 
+        `Payment amount ($${amount.toFixed(2)}) is greater than outstanding balance ($${selectedCustomer.outstandingBalance.toFixed(2)}). Continue?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Continue', 
+            onPress: async () => {
+              await completePayment(selectedCustomer, amount);
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    await completePayment(selectedCustomer, amount);
+  };
+
+  const completePayment = async (customer: Customer, amount: number) => {
     try {
       // Subtract payment from customer balance (negative amount reduces balance)
       await updateCustomerBalance(customer.id, -amount);
@@ -141,6 +135,10 @@ export default function CustomersScreen() {
     } catch (error) {
       console.error('Error processing payment:', error);
       Alert.alert('Error', 'Failed to record payment');
+    } finally {
+      setShowPaymentModal(false);
+      setSelectedCustomer(null);
+      setPaymentAmount('');
     }
   };
 
@@ -210,6 +208,60 @@ export default function CustomersScreen() {
             }}
           />
         )}
+
+        {/* Payment Modal */}
+        <Modal
+          visible={showPaymentModal}
+          animationType="fade"
+          transparent={true}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: Spacing.lg,
+          }}>
+            <View style={{
+              backgroundColor: colors.background,
+              borderRadius: BorderRadius.lg,
+              padding: Spacing.lg,
+              width: '100%',
+              maxWidth: 400,
+              ...Shadow.lg,
+            }}>
+              <Text style={styles.heading2}>Record Payment</Text>
+              
+              <Text style={styles.body}>
+                Customer: {selectedCustomer?.name}
+              </Text>
+              
+              <TextInput
+                style={[styles.input, { borderColor: colors.border }]}
+                placeholder="Enter payment amount"
+                placeholderTextColor={colors.textTertiary}
+                keyboardType="numeric"
+                value={paymentAmount}
+                onChangeText={setPaymentAmount}
+              />
+
+              <View style={styles.flexRow}>
+                <TouchableOpacity
+                  onPress={() => setShowPaymentModal(false)}
+                  style={[styles.buttonSecondary, { flex: 1, marginRight: Spacing.sm }]}
+                >
+                  <Text style={[styles.body, { color: colors.textInverse }]}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={processPayment}
+                  style={[styles.buttonPrimary, { flex: 1 }]}
+                >
+                  <Text style={[styles.body, { color: colors.textInverse }]}>Confirm Payment</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );

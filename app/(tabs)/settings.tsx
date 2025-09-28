@@ -6,45 +6,21 @@ import {
   TouchableOpacity, 
   Alert,
   ScrollView,
-  Modal,
   Share
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { createStyles } from '../../constants/styles';
 import { Spacing, Colors } from '../../constants/tokens';
-import { useColorScheme } from '../../hooks/use-color-scheme';
 import { exportDataToJSON, importDataFromJSON } from '../../services/database';
 
-const THEME_KEY = '@hisab_theme';
-
 export default function SettingsScreen() {
-  const colorScheme = useColorScheme();
-  const styles = createStyles(colorScheme ?? 'light');
-  const colors = Colors[colorScheme ?? 'light'];
+  const styles = createStyles();
+  const colors = Colors.light;
   
-  const [isLightTheme, setIsLightTheme] = useState(colorScheme === 'light');
   const [loading, setLoading] = useState(false);
-  const [showThemeModal, setShowThemeModal] = useState(false);
-
-  const handleThemeChange = async (lightTheme: boolean) => {
-    try {
-      await AsyncStorage.setItem(THEME_KEY, lightTheme ? 'light' : 'dark');
-      setIsLightTheme(lightTheme);
-      
-      Alert.alert(
-        'Theme Changed', 
-        'Please restart the app to apply the new theme.',
-        [{ text: 'OK' }]
-      );
-    } catch (err) {
-      console.error('Theme change error:', err);
-      Alert.alert('Error', 'Failed to save theme preference');
-    }
-  };
 
   const handleDataBackup = async () => {
     setLoading(true);
@@ -151,18 +127,6 @@ export default function SettingsScreen() {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Appearance Section */}
-          <View style={{ marginBottom: Spacing.lg }}>
-            <Text style={[styles.heading3, { marginBottom: Spacing.md }]}>Appearance</Text>
-            
-            <SettingItem
-              icon="paint-brush"
-              title="Theme"
-              description={isLightTheme ? "Light theme" : "Dark theme"}
-              onPress={() => setShowThemeModal(true)}
-            />
-          </View>
-
           {/* Data Management Section */}
           <View style={{ marginBottom: Spacing.lg }}>
             <Text style={[styles.heading3, { marginBottom: Spacing.md }]}>Data Management</Text>
@@ -182,23 +146,6 @@ export default function SettingsScreen() {
             />
           </View>
 
-          {/* About Section */}
-          <View style={{ marginBottom: Spacing.lg }}>
-            <Text style={[styles.heading3, { marginBottom: Spacing.md }]}>About</Text>
-            
-            <SettingItem
-              icon="info-circle"
-              title="Version"
-              description="1.0.0"
-            />
-
-            <SettingItem
-              icon="heart"
-              title="Made with"
-              description="React Native & Expo"
-            />
-          </View>
-
           {/* Loading indicator */}
           {loading && (
             <View style={styles.emptyState}>
@@ -207,97 +154,6 @@ export default function SettingsScreen() {
           )}
         </ScrollView>
       </View>
-
-      {/* Theme Selection Modal */}
-      <Modal
-        visible={showThemeModal}
-        animationType="slide"
-        presentationStyle="formSheet"
-        onRequestClose={() => setShowThemeModal(false)}
-      >
-        <SafeAreaView style={styles.container}>
-          <View style={styles.safeContainer}>
-            {/* Modal Header */}
-            <View style={[styles.flexRow, { 
-              justifyContent: 'space-between', 
-              marginBottom: Spacing.lg,
-              marginTop: Spacing.lg 
-            }]}>
-              <Text style={styles.heading2}>Choose Theme</Text>
-              <TouchableOpacity
-                onPress={() => setShowThemeModal(false)}
-                style={styles.buttonSecondary}
-              >
-                <Text style={[styles.body, { color: colors.primary }]}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View>
-              {/* Light Theme Option */}
-              <TouchableOpacity
-                style={[
-                  styles.listItemCompact,
-                  { marginBottom: Spacing.md },
-                  isLightTheme && { borderColor: colors.primary, borderWidth: 2 }
-                ]}
-                onPress={() => {
-                  handleThemeChange(true);
-                  setShowThemeModal(false);
-                }}
-              >
-                <View style={styles.flexRow}>
-                  <FontAwesome 
-                    name="sun-o" 
-                    size={24} 
-                    color={colors.text} 
-                    style={{ marginRight: Spacing.md }}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.body}>Light Theme</Text>
-                    <Text style={styles.bodySecondary}>Clean and bright interface</Text>
-                  </View>
-                  {isLightTheme && (
-                    <FontAwesome name="check-circle" size={20} color={colors.primary} />
-                  )}
-                </View>
-              </TouchableOpacity>
-
-              {/* Dark Theme Option */}
-              <TouchableOpacity
-                style={[
-                  styles.listItemCompact,
-                  { marginBottom: Spacing.md },
-                  !isLightTheme && { borderColor: colors.primary, borderWidth: 2 }
-                ]}
-                onPress={() => {
-                  handleThemeChange(false);
-                  setShowThemeModal(false);
-                }}
-              >
-                <View style={styles.flexRow}>
-                  <FontAwesome 
-                    name="moon-o" 
-                    size={24} 
-                    color={colors.text} 
-                    style={{ marginRight: Spacing.md }}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.body}>Dark Theme</Text>
-                    <Text style={styles.bodySecondary}>Easy on the eyes</Text>
-                  </View>
-                  {!isLightTheme && (
-                    <FontAwesome name="check-circle" size={20} color={colors.primary} />
-                  )}
-                </View>
-              </TouchableOpacity>
-
-              <Text style={[styles.bodySecondary, { marginTop: Spacing.md, textAlign: 'center' }]}>
-                Theme changes require an app restart to take effect
-              </Text>
-            </View>
-          </View>
-        </SafeAreaView>
-      </Modal>
     </SafeAreaView>
   );
 }

@@ -5,11 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '../../components/haptic-tab';
 import { Colors } from '../../constants/tokens';
-import { useColorScheme } from '../../hooks/use-color-scheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const colors = Colors.light;
   const insets = useSafeAreaInsets();
 
   return (

@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
 import { BorderRadius, Colors, Shadow, Spacing, Typography } from "./tokens";
 
-export const createStyles = (colorScheme: "light" | "dark" = "light") => {
-  const colors = Colors[colorScheme];
+export const createStyles = () => {
+  const colors = Colors.light;
 
   return StyleSheet.create({
     // Container styles - centered and balanced

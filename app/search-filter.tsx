@@ -16,14 +16,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createStyles } from "../constants/styles";
 import { Colors, Spacing } from "../constants/tokens";
-import { useColorScheme } from "../hooks/use-color-scheme";
 import { ProductFilters } from "../services/database";
 import { getCurrentFilters, setCurrentFilters } from "../services/filter-store";
 
 export default function SearchFilterModal() {
-  const colorScheme = useColorScheme();
-  const styles = createStyles(colorScheme ?? "light");
-  const colors = Colors[colorScheme ?? "light"];
+  const styles = createStyles();
+  const colors = Colors.light;
 
   // Get current filters from store
   const currentFilters: ProductFilters = getCurrentFilters();
