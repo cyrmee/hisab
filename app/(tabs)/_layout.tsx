@@ -50,8 +50,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="erub"
         options={{
-          title: 'Erub',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="credit-card" color={color} />,
+          title: 'Customers',
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="users" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
         }}
       />
     </Tabs>
