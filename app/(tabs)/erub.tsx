@@ -1,25 +1,25 @@
-import { FontAwesome } from '@expo/vector-icons';
-import React, { useState, useCallback } from 'react';
-import { 
-  Text, 
-  View, 
-  FlatList, 
-  TouchableOpacity, 
+import { FontAwesome } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
+import {
   Alert,
-  RefreshControl,
+  FlatList,
   Modal,
-  TextInput
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+  RefreshControl,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { createStyles } from '../../constants/styles';
-import { Spacing, Colors, BorderRadius, Shadow } from '../../constants/tokens';
-import { 
+import { createStyles } from "../../constants/styles";
+import { BorderRadius, Colors, Shadow, Spacing } from "../../constants/tokens";
+import {
+  Customer,
   getCustomersWithBalance,
   updateCustomerBalance,
-  Customer 
-} from '../../services/database';
+} from "../../services/database";
 
 interface CustomerItemProps {
   item: Customer;
@@ -37,7 +37,12 @@ function CustomerItem({ item, onPayment, colors, styles }: CustomerItemProps) {
           {item.phoneNumber && (
             <Text style={styles.bodySecondary}>{item.phoneNumber}</Text>
           )}
-          <Text style={[styles.body, { color: colors.error, marginTop: Spacing.xs }]}>
+          <Text
+            style={[
+              styles.body,
+              { color: colors.error, marginTop: Spacing.xs },
+            ]}
+          >
             Outstanding: ${item.outstandingBalance.toFixed(2)}
           </Text>
         </View>
@@ -60,8 +65,10 @@ export default function CustomersScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
+  const [paymentAmount, setPaymentAmount] = useState("");
 
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
@@ -69,8 +76,8 @@ export default function CustomersScreen() {
       const customersData = await getCustomersWithBalance();
       setCustomers(customersData);
     } catch (error) {
-      console.error('Error fetching customers:', error);
-      Alert.alert('Error', 'Failed to load customers');
+      console.error("Error fetching customers:", error);
+      Alert.alert("Error", "Failed to load customers");
     } finally {
       setLoading(false);
     }
@@ -90,7 +97,7 @@ export default function CustomersScreen() {
 
   const handlePayment = (customer: Customer) => {
     setSelectedCustomer(customer);
-    setPaymentAmount('');
+    setPaymentAmount("");
     setShowPaymentModal(true);
   };
 
@@ -99,22 +106,26 @@ export default function CustomersScreen() {
 
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) {
-      Alert.alert('Error', 'Please enter a valid payment amount');
+      Alert.alert("Error", "Please enter a valid payment amount");
       return;
     }
 
     if (amount > selectedCustomer.outstandingBalance) {
       Alert.alert(
-        'Warning', 
-        `Payment amount ($${amount.toFixed(2)}) is greater than outstanding balance ($${selectedCustomer.outstandingBalance.toFixed(2)}). Continue?`,
+        "Warning",
+        `Payment amount ($${amount.toFixed(
+          2
+        )}) is greater than outstanding balance ($${selectedCustomer.outstandingBalance.toFixed(
+          2
+        )}). Continue?`,
         [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Continue', 
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Continue",
             onPress: async () => {
               await completePayment(selectedCustomer, amount);
-            }
-          }
+            },
+          },
         ]
       );
       return;
@@ -127,18 +138,21 @@ export default function CustomersScreen() {
     try {
       // Subtract payment from customer balance (negative amount reduces balance)
       await updateCustomerBalance(customer.id, -amount);
-      
-      Alert.alert('Success', `Payment of $${amount.toFixed(2)} recorded for ${customer.name}`);
-      
+
+      Alert.alert(
+        "Success",
+        `Payment of $${amount.toFixed(2)} recorded for ${customer.name}`
+      );
+
       // Refresh the list
       await fetchCustomers();
     } catch (error) {
-      console.error('Error processing payment:', error);
-      Alert.alert('Error', 'Failed to record payment');
+      console.error("Error processing payment:", error);
+      Alert.alert("Error", "Failed to record payment");
     } finally {
       setShowPaymentModal(false);
       setSelectedCustomer(null);
-      setPaymentAmount('');
+      setPaymentAmount("");
     }
   };
 
@@ -151,21 +165,37 @@ export default function CustomersScreen() {
     />
   );
 
-  const totalOutstanding = customers.reduce((sum, customer) => sum + customer.outstandingBalance, 0);
+  const totalOutstanding = customers.reduce(
+    (sum, customer) => sum + customer.outstandingBalance,
+    0
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.safeContainer}>
         {/* Header */}
-        <View style={[styles.flexRow, { 
-          marginTop: Spacing.lg, 
-          marginBottom: Spacing.lg,
-          justifyContent: 'space-between',
-          alignItems: 'center' 
-        }]}>
+        <View
+          style={[
+            styles.flexRow,
+            {
+              marginTop: Spacing.lg,
+              marginBottom: Spacing.lg,
+              justifyContent: "space-between",
+              alignItems: "center",
+            },
+          ]}
+        >
           <Text style={styles.heading1}>Credit Customers</Text>
           {totalOutstanding > 0 && (
-            <View style={[{ backgroundColor: colors.surface, padding: Spacing.sm, borderRadius: BorderRadius.md }]}>
+            <View
+              style={[
+                {
+                  backgroundColor: colors.surface,
+                  padding: Spacing.sm,
+                  borderRadius: BorderRadius.md,
+                },
+              ]}
+            >
               <Text style={styles.bodySecondary}>Total Outstanding</Text>
               <Text style={[styles.heading3, { color: colors.error }]}>
                 ${totalOutstanding.toFixed(2)}
@@ -215,27 +245,31 @@ export default function CustomersScreen() {
           animationType="fade"
           transparent={true}
         >
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: Spacing.lg,
-          }}>
-            <View style={{
-              backgroundColor: colors.background,
-              borderRadius: BorderRadius.lg,
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              justifyContent: "center",
+              alignItems: "center",
               padding: Spacing.lg,
-              width: '100%',
-              maxWidth: 400,
-              ...Shadow.lg,
-            }}>
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: colors.background,
+                borderRadius: BorderRadius.lg,
+                padding: Spacing.lg,
+                width: "100%",
+                maxWidth: 400,
+                ...Shadow.lg,
+              }}
+            >
               <Text style={styles.heading2}>Record Payment</Text>
-              
+
               <Text style={styles.body}>
                 Customer: {selectedCustomer?.name}
               </Text>
-              
+
               <TextInput
                 style={[styles.input, { borderColor: colors.border }]}
                 placeholder="Enter payment amount"
@@ -248,15 +282,22 @@ export default function CustomersScreen() {
               <View style={styles.flexRow}>
                 <TouchableOpacity
                   onPress={() => setShowPaymentModal(false)}
-                  style={[styles.buttonSecondary, { flex: 1, marginRight: Spacing.sm }]}
+                  style={[
+                    styles.buttonSecondary,
+                    { flex: 1, marginRight: Spacing.sm },
+                  ]}
                 >
-                  <Text style={[styles.body, { color: colors.textInverse }]}>Cancel</Text>
+                  <Text style={[styles.body, { color: colors.textInverse }]}>
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={processPayment}
                   style={[styles.buttonPrimary, { flex: 1 }]}
                 >
-                  <Text style={[styles.body, { color: colors.textInverse }]}>Confirm Payment</Text>
+                  <Text style={[styles.body, { color: colors.textInverse }]}>
+                    Confirm Payment
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>

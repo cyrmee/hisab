@@ -1,10 +1,10 @@
-import { FontAwesome } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FontAwesome } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { HapticTab } from '../../components/haptic-tab';
-import { Colors } from '../../constants/tokens';
+import { HapticTab } from "../../components/haptic-tab";
+import { Colors } from "../../constants/tokens";
 
 export default function TabLayout() {
   const colors = Colors.light;
@@ -28,35 +28,44 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '600',
+          fontWeight: "600",
         },
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="sales"
         options={{
-          title: 'Sales',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="usd" color={color} />,
+          title: "Sales",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="usd" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="inventory"
         options={{
-          title: 'Inventory',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="list" color={color} />,
+          title: "Inventory",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="list" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="erub"
         options={{
-          title: 'Customers',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="users" color={color} />,
+          title: "Customers",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="users" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
+          title: "Settings",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="cog" color={color} />
+          ),
         }}
       />
     </Tabs>

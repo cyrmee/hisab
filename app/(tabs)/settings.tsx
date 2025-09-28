@@ -1,41 +1,40 @@
-import { FontAwesome } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { 
-  Text, 
-  View, 
-  TouchableOpacity, 
+import { FontAwesome } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
+import React, { useState } from "react";
+import {
   Alert,
   ScrollView,
-  Share
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+  Share,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { createStyles } from '../../constants/styles';
-import { Spacing, Colors } from '../../constants/tokens';
-import { exportDataToJSON, importDataFromJSON } from '../../services/database';
+import { createStyles } from "../../constants/styles";
+import { Colors, Spacing } from "../../constants/tokens";
+import { exportDataToJSON, importDataFromJSON } from "../../services/database";
 
 export default function SettingsScreen() {
   const styles = createStyles();
   const colors = Colors.light;
-  
+
   const [loading, setLoading] = useState(false);
 
   const handleDataBackup = async () => {
     setLoading(true);
     try {
       const jsonData = await exportDataToJSON();
-      
+
       // Use sharing directly with the JSON content
       await Share.share({
         message: jsonData,
-        title: 'Hisab Data Backup'
+        title: "Hisab Data Backup",
       });
-      
     } catch (error) {
-      console.error('Backup error:', error);
-      Alert.alert('Error', 'Failed to create backup');
+      console.error("Backup error:", error);
+      Alert.alert("Error", "Failed to create backup");
     } finally {
       setLoading(false);
     }
@@ -43,46 +42,51 @@ export default function SettingsScreen() {
 
   const handleDataImport = async () => {
     Alert.alert(
-      'Import Data',
-      'This will replace all existing data with the imported data. This action cannot be undone. Continue?',
+      "Import Data",
+      "This will replace all existing data with the imported data. This action cannot be undone. Continue?",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Continue', 
-          style: 'destructive',
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Continue",
+          style: "destructive",
           onPress: async () => {
             try {
               const result = await DocumentPicker.getDocumentAsync({
-                type: 'application/json',
-                copyToCacheDirectory: true
+                type: "application/json",
+                copyToCacheDirectory: true,
               });
 
               if (result.canceled) return;
 
               setLoading(true);
-              
-              const fileContent = await FileSystem.readAsStringAsync(result.assets[0].uri);
+
+              const fileContent = await FileSystem.readAsStringAsync(
+                result.assets[0].uri
+              );
               await importDataFromJSON(fileContent);
-              
-              Alert.alert('Success', 'Data imported successfully');
+
+              Alert.alert("Success", "Data imported successfully");
             } catch (error) {
-              console.error('Import error:', error);
-              Alert.alert('Error', 'Failed to import data. Please check the file format.');
+              console.error("Import error:", error);
+              Alert.alert(
+                "Error",
+                "Failed to import data. Please check the file format."
+              );
             } finally {
               setLoading(false);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
 
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    description, 
-    onPress, 
-    rightElement 
+  const SettingItem = ({
+    icon,
+    title,
+    description,
+    onPress,
+    rightElement,
   }: {
     icon: string;
     title: string;
@@ -96,10 +100,10 @@ export default function SettingsScreen() {
       disabled={!onPress}
     >
       <View style={styles.flexRow}>
-        <FontAwesome 
-          name={icon as any} 
-          size={24} 
-          color={colors.primary} 
+        <FontAwesome
+          name={icon as any}
+          size={24}
+          color={colors.primary}
           style={{ marginRight: Spacing.md }}
         />
         <View style={{ flex: 1 }}>
@@ -108,9 +112,14 @@ export default function SettingsScreen() {
             <Text style={styles.bodySecondary}>{description}</Text>
           )}
         </View>
-        {rightElement || (
-          onPress && <FontAwesome name="chevron-right" size={16} color={colors.textTertiary} />
-        )}
+        {rightElement ||
+          (onPress && (
+            <FontAwesome
+              name="chevron-right"
+              size={16}
+              color={colors.textTertiary}
+            />
+          ))}
       </View>
     </TouchableOpacity>
   );
@@ -129,8 +138,10 @@ export default function SettingsScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Data Management Section */}
           <View style={{ marginBottom: Spacing.lg }}>
-            <Text style={[styles.heading3, { marginBottom: Spacing.md }]}>Data Management</Text>
-            
+            <Text style={[styles.heading3, { marginBottom: Spacing.md }]}>
+              Data Management
+            </Text>
+
             <SettingItem
               icon="download"
               title="Backup Data"
