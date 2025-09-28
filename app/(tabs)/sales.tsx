@@ -12,7 +12,6 @@ import {
   ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Picker } from '@react-native-picker/picker';
 
 import { createStyles } from '../../constants/styles';
 import { Spacing, Colors } from '../../constants/tokens';
@@ -80,6 +79,7 @@ export default function SalesScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSaleModal, setShowSaleModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Sale form state
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
@@ -88,6 +88,8 @@ export default function SalesScreen() {
   const [isCreditSale, setIsCreditSale] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [productSearchQuery, setProductSearchQuery] = useState('');
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -135,7 +137,7 @@ export default function SalesScreen() {
     }
 
     if (qty > selectedProduct.quantity) {
-      Alert.alert('Error', 'Not enough stock available');
+      Alert.alert('Error', `Not enough stock available. Only ${selectedProduct.quantity} items in stock.`);
       return;
     }
 
@@ -148,7 +150,7 @@ export default function SalesScreen() {
       const newQuantity = newItems[existingIndex].quantity + qty;
       
       if (newQuantity > selectedProduct.quantity) {
-        Alert.alert('Error', 'Not enough stock available');
+        Alert.alert('Error', `Not enough stock available. Only ${selectedProduct.quantity} items in stock, you already have ${newItems[existingIndex].quantity} in cart.`);
         return;
       }
       
@@ -162,6 +164,8 @@ export default function SalesScreen() {
     // Reset form
     setSelectedProduct(null);
     setQuantity('1');
+    setProductSearchQuery('');
+    setShowProductDropdown(false);
   };
 
   const removeItemFromSale = (productId: number) => {
@@ -219,6 +223,10 @@ export default function SalesScreen() {
       setCustomerName('');
       setCustomerPhone('');
       setIsCreditSale(false);
+      setProductSearchQuery('');
+      setSelectedProduct(null);
+      setQuantity('1');
+      setShowProductDropdown(false);
       setShowSaleModal(false);
       
       // Refresh data
@@ -263,6 +271,22 @@ export default function SalesScreen() {
     />
   );
 
+  // Filter transactions based on search query
+  const filteredTransactions = transactions.filter(transaction => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const amount = transaction.totalAmount.toFixed(2);
+    const date = new Date(transaction.timestamp * 1000).toLocaleDateString();
+    const type = transaction.isCreditSale ? 'credit' : 'cash';
+    const customer = transaction.customerName?.toLowerCase() || '';
+    
+    return amount.includes(query) || 
+           date.toLowerCase().includes(query) || 
+           type.includes(query) || 
+           customer.includes(query);
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.safeContainer}>
@@ -271,24 +295,38 @@ export default function SalesScreen() {
           <Text style={styles.heading1}>Sales</Text>
         </View>
 
+        {/* Search Bar */}
+        <View style={{ marginBottom: Spacing.lg }}>
+          <TextInput
+            style={[
+              styles.inputCompact,
+              { flex: 1 },
+            ]}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search sales..."
+            placeholderTextColor={colors.textTertiary}
+          />
+        </View>
+
         {/* Transactions List */}
         {loading ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>Loading transactions...</Text>
           </View>
-        ) : transactions.length === 0 ? (
+        ) : filteredTransactions.length === 0 ? (
           <View style={styles.emptyState}>
-            <FontAwesome name="shopping-cart" size={48} color={colors.textTertiary} />
+            <FontAwesome name="search" size={48} color={colors.textTertiary} />
             <Text style={[styles.emptyStateText, { marginTop: Spacing.md }]}>
-              No sales recorded yet
+              {searchQuery ? 'No sales match your search' : 'No sales recorded yet'}
             </Text>
             <Text style={styles.bodySecondary}>
-              Tap the + button to create your first sale
+              {searchQuery ? 'Try adjusting your search terms' : 'Tap the + button to create your first sale'}
             </Text>
           </View>
         ) : (
           <FlatList
-            data={transactions}
+            data={filteredTransactions}
             renderItem={renderTransaction}
             keyExtractor={(item) => item.id.toString()}
             showsVerticalScrollIndicator={false}
@@ -302,29 +340,36 @@ export default function SalesScreen() {
       {/* Floating Action Button */}
       <View
         style={{
-          position: 'absolute',
-          bottom: 90, // Above tab bar
-          right: Spacing.lg,
-          zIndex: 1000,
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          zIndex: 9999,
+
+          // Circle styles on wrapper - matching inventory
+          backgroundColor: colors.primary,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          alignItems: "center",
+          justifyContent: "center",
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 8,
+          borderWidth: 0,
+          borderColor: colors.primary,
         }}
       >
         <TouchableOpacity
           onPress={() => setShowSaleModal(true)}
-          style={[
-            {
-              width: 56,
-              height: 56,
-              borderRadius: 28,
-              backgroundColor: colors.primary,
-              justifyContent: 'center',
-              alignItems: 'center',
-              shadowColor: colors.primary,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
-            },
-          ]}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 28,
+          }}
+          activeOpacity={0.9}
         >
           <FontAwesome name="plus" size={20} color={colors.textInverse} />
         </TouchableOpacity>
@@ -350,30 +395,88 @@ export default function SalesScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+            <ScrollView 
+              style={{ flex: 1 }} 
+              showsVerticalScrollIndicator={false}
+              onTouchStart={() => setShowProductDropdown(false)}
+            >
               {/* Product Selection */}
               <View style={{ marginBottom: Spacing.lg }}>
                 <Text style={[styles.bodySecondary, { marginBottom: Spacing.xs }]}>
                   Select Product
                 </Text>
-                <View style={[styles.inputCompact, { paddingHorizontal: 0 }]}>
-                  <Picker
-                    selectedValue={selectedProduct?.id || ''}
-                    onValueChange={(itemValue) => {
-                      const product = products.find(p => p.id === itemValue);
-                      setSelectedProduct(product || null);
+                <View style={{ position: 'relative' }}>
+                  <TextInput
+                    style={styles.inputCompact}
+                    value={selectedProduct ? `${selectedProduct.name} (${selectedProduct.quantity} available) - $${selectedProduct.salePrice}` : productSearchQuery}
+                    onChangeText={(text) => {
+                      setProductSearchQuery(text);
+                      setSelectedProduct(null);
+                      setShowProductDropdown(text.length > 0);
                     }}
-                    style={{ color: colors.text }}
-                  >
-                    <Picker.Item label="Select a product..." value="" />
-                    {products.map(product => (
-                      <Picker.Item 
-                        key={product.id} 
-                        label={`${product.name} (${product.quantity} available) - $${product.salePrice}`} 
-                        value={product.id} 
-                      />
-                    ))}
-                  </Picker>
+                    onFocus={() => setShowProductDropdown(productSearchQuery.length > 0 || products.length > 0)}
+                    placeholder="Search for a product..."
+                    placeholderTextColor={colors.textTertiary}
+                  />
+                  
+                  {/* Product Dropdown */}
+                  {showProductDropdown && (
+                    <View style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: colors.surface,
+                      borderRadius: 8,
+                      marginTop: 4,
+                      maxHeight: 200,
+                      zIndex: 1000,
+                      elevation: 5,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 4,
+                    }}>
+                      <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+                        {products
+                          .filter(product => 
+                            productSearchQuery === '' || 
+                            product.name.toLowerCase().includes(productSearchQuery.toLowerCase())
+                          )
+                          .map(product => (
+                            <TouchableOpacity
+                              key={product.id}
+                              style={{
+                                padding: Spacing.md,
+                                borderBottomWidth: 1,
+                                borderBottomColor: colors.border,
+                              }}
+                              onPress={() => {
+                                setSelectedProduct(product);
+                                setProductSearchQuery('');
+                                setShowProductDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.body}>
+                                {product.name}
+                              </Text>
+                              <Text style={styles.bodySecondary}>
+                                {product.quantity} available - ${product.salePrice}
+                              </Text>
+                            </TouchableOpacity>
+                          ))
+                        }
+                        {products.filter(product => 
+                          productSearchQuery === '' || 
+                          product.name.toLowerCase().includes(productSearchQuery.toLowerCase())
+                        ).length === 0 && (
+                          <View style={{ padding: Spacing.md }}>
+                            <Text style={styles.bodySecondary}>No products found</Text>
+                          </View>
+                        )}
+                      </ScrollView>
+                    </View>
+                  )}
                 </View>
               </View>
 
