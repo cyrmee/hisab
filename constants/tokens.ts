@@ -185,18 +185,19 @@ export const Shadow = {
   }),
 };
 
-// Fast, subtle animations
+// Fast, subtle animations - platform optimized
 export const Animation = {
   duration: {
-    fast: 150,
-    normal: 200,
-    slow: 250, // Max 250ms as per guidelines
+    fast: Platform.OS === 'ios' ? 150 : 120,
+    normal: Platform.OS === 'ios' ? 200 : 180,
+    slow: Platform.OS === 'ios' ? 250 : 220,
   },
   easing: {
     ease: "ease-out" as const,
     spring: "ease-in-out" as const,
   },
   scale: {
-    press: 0.95, // Button press scale down
+    press: Platform.OS === 'ios' ? 0.95 : 0.92, // Platform-specific press feedback
+    tap: Platform.OS === 'ios' ? 0.98 : 0.96,   // Lighter feedback for taps
   },
 };

@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { BorderRadius, Colors, Shadow, Spacing, Typography } from "./tokens";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -25,20 +25,23 @@ export const createStyles = (colorScheme?: 'light' | 'dark' | null) => {
       paddingHorizontal: Spacing.lg,
     },
 
-    // Modal styles - Full screen modals
+    // Modal styles - platform optimized
     modalContainer: {
       flex: 1,
       backgroundColor: colors.background,
-      borderTopLeftRadius: 16, // Larger radius for iOS feel
-      borderTopRightRadius: 16,
-      marginTop: 0, // Full screen modal
-      ...Shadow.lg, // Add shadow for depth
+      borderTopLeftRadius: Platform.OS === 'ios' ? 20 : 16,
+      borderTopRightRadius: Platform.OS === 'ios' ? 20 : 16,
+      marginTop: 0,
+      ...Platform.select({
+        ios: Shadow.lg,
+        android: { elevation: 5 },
+      }),
     },
     modalContent: {
       flex: 1,
       backgroundColor: colors.background,
       paddingHorizontal: Spacing.lg,
-      paddingTop: Spacing.lg,
+      paddingTop: Platform.OS === 'ios' ? Spacing.lg : Spacing.md,
       paddingBottom: Spacing.lg,
     },
     modalHeader: {
@@ -46,69 +49,82 @@ export const createStyles = (colorScheme?: 'light' | 'dark' | null) => {
       alignItems: "center",
       justifyContent: "space-between",
       marginBottom: Spacing.lg,
-      paddingBottom: Spacing.sm,
-      borderBottomWidth: 1,
+      paddingBottom: Platform.OS === 'ios' ? Spacing.sm : Spacing.md,
+      borderBottomWidth: Platform.OS === 'ios' ? StyleSheet.hairlineWidth : 1,
       borderBottomColor: colors.borderSecondary,
     },
     modalHandle: {
-      width: 36,
-      height: 4,
+      width: Platform.OS === 'ios' ? 36 : 40,
+      height: Platform.OS === 'ios' ? 5 : 4,
       backgroundColor: colors.textTertiary,
-      borderRadius: 2,
+      borderRadius: Platform.OS === 'ios' ? 3 : 2,
       alignSelf: "center",
-      marginTop: Spacing.sm,
+      marginTop: Platform.OS === 'ios' ? Spacing.sm : Spacing.xs,
       marginBottom: Spacing.md,
     },
 
-    // Card styles - compact and balanced
+    // Card styles - platform optimized
     card: {
       backgroundColor: colors.surface,
       borderRadius: BorderRadius.lg,
       padding: Spacing.lg,
-      marginVertical: Spacing.sm,
-      ...Shadow.sm,
+      marginVertical: Platform.OS === 'ios' ? Spacing.sm : Spacing.xs,
+      ...Platform.select({
+        ios: Shadow.sm,
+        android: { elevation: 1 },
+      }),
     },
     cardElevated: {
       backgroundColor: colors.surfaceElevated,
       borderRadius: BorderRadius.lg,
       padding: Spacing.lg,
-      marginVertical: Spacing.sm,
-      ...Shadow.md,
+      marginVertical: Platform.OS === 'ios' ? Spacing.sm : Spacing.xs,
+      ...Platform.select({
+        ios: Shadow.md,
+        android: { elevation: 3 },
+      }),
     },
 
     // Button styles - compact with proper touch targets
     buttonPrimary: {
       backgroundColor: colors.primary,
-      paddingVertical: Spacing.md,
+      paddingVertical: Platform.OS === 'ios' ? Spacing.md : Spacing.lg,
       paddingHorizontal: Spacing.lg,
       borderRadius: BorderRadius.lg,
       alignItems: "center",
       justifyContent: "center",
-      minHeight: 44, // Accessibility minimum
-      ...Shadow.sm,
+      minHeight: Platform.OS === 'ios' ? 44 : 48,
+      ...Platform.select({
+        ios: Shadow.sm,
+        android: { elevation: 2 },
+      }),
     },
     buttonSecondary: {
       backgroundColor: "transparent",
-      paddingVertical: Spacing.md,
+      paddingVertical: Platform.OS === 'ios' ? Spacing.md : Spacing.lg,
       paddingHorizontal: Spacing.lg,
       borderRadius: BorderRadius.lg,
-      borderWidth: 1,
+      borderWidth: Platform.OS === 'ios' ? 1 : 2,
       borderColor: colors.border,
       alignItems: "center",
       justifyContent: "center",
-      minHeight: 44, // Accessibility minimum
+      minHeight: Platform.OS === 'ios' ? 44 : 48,
     },
     buttonFilterCompact: {
       backgroundColor: colors.surface,
       paddingVertical: Spacing.sm,
       paddingHorizontal: Spacing.sm,
       borderRadius: BorderRadius.md,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderWidth: Platform.OS === 'ios' ? 1 : 0,
+      borderColor: Platform.OS === 'ios' ? colors.border : 'transparent',
       alignItems: "center",
       justifyContent: "center",
-      height: 48, // Updated to match inputCompact height
-      width: 48, // Adjusted width to maintain square appearance
+      height: Platform.OS === 'ios' ? 40 : 48,
+      width: Platform.OS === 'ios' ? 40 : 48,
+      ...Platform.select({
+        ios: {},
+        android: { elevation: 1 },
+      }),
     },
     buttonText: {
       color: colors.textInverse,
@@ -176,58 +192,82 @@ export const createStyles = (colorScheme?: 'light' | 'dark' | null) => {
     // Input styles - compact and accessible
     input: {
       backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: BorderRadius.md,
-      paddingVertical: Spacing.md,
-      paddingHorizontal: Spacing.md,
+      borderWidth: Platform.OS === 'ios' ? 1 : 0,
+      borderColor: Platform.OS === 'ios' ? colors.border : 'transparent',
+      borderRadius: BorderRadius.lg,
+      paddingVertical: Platform.OS === 'ios' ? Spacing.md : Spacing.lg,
+      paddingHorizontal: Spacing.lg,
       fontSize: Typography.size.body,
       color: colors.text,
-      minHeight: 44, // Accessibility minimum
+      minHeight: Platform.OS === 'ios' ? 44 : 56, // Material Design height
+      ...Platform.select({
+        ios: Shadow.sm,
+        android: { elevation: 1 },
+      }),
     },
     inputCompact: {
       backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderWidth: Platform.OS === 'ios' ? 1 : 0,
+      borderColor: Platform.OS === 'ios' ? colors.border : 'transparent',
       borderRadius: BorderRadius.md,
-      paddingVertical: Spacing.sm,
+      paddingVertical: Platform.OS === 'ios' ? Spacing.sm + 2 : Spacing.md,
       paddingHorizontal: Spacing.md,
       fontSize: Typography.size.body,
       color: colors.text,
-      height: 48, // Increased height for better cursor visibility
+      height: Platform.OS === 'ios' ? 40 : 48,
+      ...Platform.select({
+        ios: {},
+        android: { elevation: 1 },
+      }),
     },
     inputFocused: {
       borderColor: colors.primary,
-      ...Shadow.sm,
+      borderWidth: Platform.OS === 'ios' ? 2 : 0,
+      ...Platform.select({
+        ios: {
+          ...Shadow.md,
+        },
+        android: {
+          elevation: 2,
+          backgroundColor: colors.surfaceElevated,
+        },
+      }),
     },
 
-    // List styles - balanced spacing
+    // List styles - platform optimized
     listItem: {
       backgroundColor: colors.surface,
       borderRadius: BorderRadius.lg,
       padding: Spacing.lg,
-      marginVertical: Spacing.sm,
+      marginVertical: Platform.OS === 'ios' ? Spacing.sm : Spacing.xs,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      minHeight: 44, // Accessibility minimum
-      ...Shadow.sm,
+      minHeight: Platform.OS === 'ios' ? 44 : 56,
+      ...Platform.select({
+        ios: Shadow.sm,
+        android: { elevation: 1 },
+      }),
     },
     listItemCompact: {
       backgroundColor: colors.surface,
       borderRadius: BorderRadius.lg,
-      paddingVertical: Spacing.md,
+      paddingVertical: Platform.OS === 'ios' ? Spacing.md : Spacing.lg,
       paddingHorizontal: Spacing.lg,
       marginVertical: Spacing.xs,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      minHeight: 56, // Slightly larger for better touch experience
-      ...Shadow.sm,
+      minHeight: Platform.OS === 'ios' ? 56 : 64,
+      ...Platform.select({
+        ios: Shadow.sm,
+        android: { elevation: 2 },
+      }),
     },
     listItemPressed: {
       backgroundColor: colors.backgroundSecondary,
-      transform: [{ scale: 0.98 }],
+      transform: [{ scale: Platform.OS === 'ios' ? 0.98 : 0.96 }],
+      opacity: Platform.OS === 'ios' ? 0.8 : 0.9,
     },
 
     // Empty state styles - centered
@@ -288,23 +328,26 @@ export const createStyles = (colorScheme?: 'light' | 'dark' | null) => {
       paddingVertical: Spacing.md,
     },
 
-    // Floating Action Button (FAB) styles
+    // Floating Action Button (FAB) styles - Material Design compliant
     fab: {
       position: "absolute",
-      bottom: Spacing.xl,
+      bottom: Platform.OS === 'ios' ? Spacing.xl : Spacing.lg,
       right: Spacing.lg,
       backgroundColor: colors.primary,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
+      width: Platform.OS === 'ios' ? 56 : 56,
+      height: Platform.OS === 'ios' ? 56 : 56,
+      borderRadius: Platform.OS === 'ios' ? 28 : 28,
       alignItems: "center",
       justifyContent: "center",
       zIndex: 10,
-      ...Shadow.lg,
+      ...Platform.select({
+        ios: Shadow.lg,
+        android: { elevation: 6 },
+      }),
     },
     fabPressed: {
-      transform: [{ scale: 0.95 }],
-      opacity: 0.9,
+      transform: [{ scale: Platform.OS === 'ios' ? 0.95 : 0.92 }],
+      opacity: Platform.OS === 'ios' ? 0.9 : 0.8,
     },
 
     // Interactive states for micro-interactions
