@@ -41,7 +41,7 @@ export default function SearchFilterModal() {
   const [maxStock, setMaxStock] = useState(
     currentFilters.maxStock?.toString() || ""
   );
-  const [sortBy, setSortBy] = useState(currentFilters.sortBy || "createdAt");
+  const [sortBy, setSortBy] = useState(currentFilters.sortBy || "updatedAt");
   const [sortOrder, setSortOrder] = useState(
     currentFilters.sortOrder || "DESC"
   );
@@ -94,7 +94,7 @@ export default function SearchFilterModal() {
     setMaxPrice("");
     setMinStock("");
     setMaxStock("");
-    setSortBy("createdAt");
+    setSortBy("updatedAt");
     setSortOrder("DESC");
   };
 
