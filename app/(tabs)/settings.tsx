@@ -115,7 +115,7 @@ export default function SettingsScreen() {
     rightElement?: React.ReactNode;
   }) => (
     <TouchableOpacity
-      style={[styles.productCard, { marginBottom: Spacing.md }]}
+      style={[styles.listItemCompact, { marginBottom: Spacing.md }]}
       onPress={onPress}
       disabled={!onPress}
     >
@@ -127,7 +127,7 @@ export default function SettingsScreen() {
           style={{ marginRight: Spacing.md }}
         />
         <View style={{ flex: 1 }}>
-          <Text style={styles.bodyPrimary}>{title}</Text>
+          <Text style={styles.body}>{title}</Text>
           {description && (
             <Text style={styles.bodySecondary}>{description}</Text>
           )}
@@ -228,7 +228,7 @@ export default function SettingsScreen() {
                 onPress={() => setShowThemeModal(false)}
                 style={styles.buttonSecondary}
               >
-                <Text style={styles.buttonSecondaryText}>Cancel</Text>
+                <Text style={[styles.body, { color: colors.primary }]}>Cancel</Text>
               </TouchableOpacity>
             </View>
 
@@ -236,7 +236,7 @@ export default function SettingsScreen() {
               {/* Light Theme Option */}
               <TouchableOpacity
                 style={[
-                  styles.productCard,
+                  styles.listItemCompact,
                   { marginBottom: Spacing.md },
                   isLightTheme && { borderColor: colors.primary, borderWidth: 2 }
                 ]}
@@ -253,7 +253,7 @@ export default function SettingsScreen() {
                     style={{ marginRight: Spacing.md }}
                   />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.bodyPrimary}>Light Theme</Text>
+                    <Text style={styles.body}>Light Theme</Text>
                     <Text style={styles.bodySecondary}>Clean and bright interface</Text>
                   </View>
                   {isLightTheme && (
@@ -265,7 +265,7 @@ export default function SettingsScreen() {
               {/* Dark Theme Option */}
               <TouchableOpacity
                 style={[
-                  styles.productCard,
+                  styles.listItemCompact,
                   { marginBottom: Spacing.md },
                   !isLightTheme && { borderColor: colors.primary, borderWidth: 2 }
                 ]}
@@ -282,7 +282,7 @@ export default function SettingsScreen() {
                     style={{ marginRight: Spacing.md }}
                   />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.bodyPrimary}>Dark Theme</Text>
+                    <Text style={styles.body}>Dark Theme</Text>
                     <Text style={styles.bodySecondary}>Easy on the eyes</Text>
                   </View>
                   {!isLightTheme && (

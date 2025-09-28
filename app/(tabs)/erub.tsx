@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 
 import { createStyles } from '../../constants/styles';
-import { Spacing, Colors } from '../../constants/tokens';
+import { Spacing, Colors, BorderRadius } from '../../constants/tokens';
 import { useColorScheme } from '../../hooks/use-color-scheme';
 import { 
   getCustomersWithBalance,
@@ -29,14 +29,14 @@ interface CustomerItemProps {
 
 function CustomerItem({ item, onPayment, colors, styles }: CustomerItemProps) {
   return (
-    <View style={[styles.productCard, { marginBottom: Spacing.md }]}>
+    <View style={[styles.listItemCompact, { marginBottom: Spacing.md }]}>
       <View style={styles.flexRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.heading3}>{item.name}</Text>
           {item.phoneNumber && (
             <Text style={styles.bodySecondary}>{item.phoneNumber}</Text>
           )}
-          <Text style={[styles.bodyPrimary, { color: colors.danger, marginTop: Spacing.xs }]}>
+          <Text style={[styles.body, { color: colors.error, marginTop: Spacing.xs }]}>
             Outstanding: ${item.outstandingBalance.toFixed(2)}
           </Text>
         </View>
@@ -44,7 +44,7 @@ function CustomerItem({ item, onPayment, colors, styles }: CustomerItemProps) {
           onPress={() => onPayment(item)}
           style={[styles.buttonPrimary, { paddingHorizontal: Spacing.md }]}
         >
-          <Text style={styles.buttonPrimaryText}>Pay</Text>
+          <Text style={[styles.body, { color: colors.textInverse }]}>Pay</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -93,7 +93,7 @@ export default function CustomersScreen() {
         { text: 'Cancel', style: 'cancel' },
         { 
           text: 'Record Payment', 
-          onPress: async (amount) => {
+          onPress: async (amount?: string) => {
             if (!amount) return;
             
             const paymentAmount = parseFloat(amount);
@@ -167,9 +167,9 @@ export default function CustomersScreen() {
         }]}>
           <Text style={styles.heading1}>Credit Customers</Text>
           {totalOutstanding > 0 && (
-            <View style={[styles.productCard, { padding: Spacing.sm }]}>
+            <View style={[{ backgroundColor: colors.surface, padding: Spacing.sm, borderRadius: BorderRadius.md }]}>
               <Text style={styles.bodySecondary}>Total Outstanding</Text>
-              <Text style={[styles.heading3, { color: colors.danger }]}>
+              <Text style={[styles.heading3, { color: colors.error }]}>
                 ${totalOutstanding.toFixed(2)}
               </Text>
             </View>

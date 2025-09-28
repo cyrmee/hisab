@@ -49,7 +49,7 @@ interface SalesItemProps {
 
 function SalesItem({ item, onDelete, colors, styles }: SalesItemProps) {
   return (
-    <View style={[styles.productCard, { marginBottom: Spacing.md }]}>
+    <View style={[styles.listItemCompact, { marginBottom: Spacing.md }]}>
       <View style={styles.flexRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.heading3}>
@@ -62,7 +62,7 @@ function SalesItem({ item, onDelete, colors, styles }: SalesItemProps) {
         </View>
         <TouchableOpacity
           onPress={() => onDelete(item)}
-          style={[styles.buttonDanger, { padding: Spacing.sm }]}
+          style={[styles.buttonSecondary, { padding: Spacing.sm, backgroundColor: colors.error }]}
         >
           <FontAwesome name="trash" size={16} color={colors.textInverse} />
         </TouchableOpacity>
@@ -346,7 +346,7 @@ export default function SalesScreen() {
                 onPress={() => setShowSaleModal(false)}
                 style={styles.buttonSecondary}
               >
-                <Text style={styles.buttonSecondaryText}>Cancel</Text>
+                <Text style={[styles.body, { color: colors.textInverse }]}>Cancel</Text>
               </TouchableOpacity>
             </View>
 
@@ -397,7 +397,7 @@ export default function SalesScreen() {
                 onPress={addItemToSale}
                 style={[styles.buttonSecondary, { marginBottom: Spacing.lg }]}
               >
-                <Text style={styles.buttonSecondaryText}>Add Item</Text>
+                <Text style={[styles.body, { color: colors.primary }]}>Add Item</Text>
               </TouchableOpacity>
 
               {/* Sale Items List */}
@@ -407,9 +407,9 @@ export default function SalesScreen() {
                     Sale Items
                   </Text>
                   {saleItems.map((item, index) => (
-                    <View key={index} style={[styles.flexRow, styles.productCard, { marginBottom: Spacing.sm }]}>
+                    <View key={index} style={[styles.flexRow, styles.listItemCompact, { marginBottom: Spacing.sm }]}>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.bodyPrimary}>
+                        <Text style={styles.body}>
                           {item.product.name} x {item.quantity}
                         </Text>
                         <Text style={styles.bodySecondary}>
@@ -420,7 +420,7 @@ export default function SalesScreen() {
                         onPress={() => removeItemFromSale(item.product.id)}
                         style={{ padding: Spacing.xs }}
                       >
-                        <FontAwesome name="trash" size={16} color={colors.danger} />
+                        <FontAwesome name="trash" size={16} color={colors.error} />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -448,7 +448,7 @@ export default function SalesScreen() {
                     ]}
                   >
                     <Text style={[
-                      styles.buttonSecondaryText,
+                      styles.body,
                       !isCreditSale && { color: colors.textInverse }
                     ]}>
                       Cash Sale
@@ -463,7 +463,7 @@ export default function SalesScreen() {
                     ]}
                   >
                     <Text style={[
-                      styles.buttonSecondaryText,
+                      styles.body,
                       isCreditSale && { color: colors.textInverse }
                     ]}>
                       Credit Sale
@@ -518,7 +518,7 @@ export default function SalesScreen() {
                   (loading || saleItems.length === 0) && { opacity: 0.5 }
                 ]}
               >
-                <Text style={styles.buttonPrimaryText}>
+                <Text style={[styles.body, { color: colors.textInverse }]}>
                   {loading ? 'Processing...' : 'Complete Sale'}
                 </Text>
               </TouchableOpacity>

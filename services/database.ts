@@ -312,7 +312,7 @@ export async function upsertCustomer(name: string, phoneNumber?: string): Promis
       const statement = db.prepareSync(
         'UPDATE customers SET phoneNumber = ?, updatedAt = ? WHERE id = ?'
       );
-      statement.executeSync([phoneNumber || existingCustomer.phoneNumber, now, existingCustomer.id]);
+      statement.executeSync([phoneNumber || existingCustomer.phoneNumber || null, now, existingCustomer.id]);
       statement.finalizeSync();
       return existingCustomer.id;
     } else {
@@ -320,7 +320,7 @@ export async function upsertCustomer(name: string, phoneNumber?: string): Promis
       const statement = db.prepareSync(
         'INSERT INTO customers (name, phoneNumber, outstandingBalance, createdAt, updatedAt) VALUES (?, ?, 0, ?, ?)'
       );
-      const result = statement.executeSync([name, phoneNumber, now, now]);
+      const result = statement.executeSync([name, phoneNumber || null, now, now]);
       statement.finalizeSync();
       return result.lastInsertRowId as number;
     }
@@ -359,7 +359,7 @@ export async function createTransaction(
     const statement = db.prepareSync(
       'INSERT INTO transactions (timestamp, totalAmount, isCreditSale, customerId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    const result = statement.executeSync([timestamp, totalAmount, creditFlag, customerId, now, now]);
+    const result = statement.executeSync([timestamp, totalAmount, creditFlag, customerId || null, now, now]);
     statement.finalizeSync();
     
     // If it's a credit sale, update customer balance
