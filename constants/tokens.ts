@@ -96,26 +96,43 @@ export const Spacing = {
   xl: 24,
 };
 
-// Compact typography scale
+// Compact typography scale - platform optimized
 export const Typography = {
   size: {
-    caption: 12, // Caption
-    body: 14, // Body (default)
-    bodyLarge: 16, // Body large
-    h2: 18, // H2: 18-20px
-    h1: 22, // H1: 20-24px (using 22 as middle ground)
+    caption: Platform.OS === 'ios' ? 12 : 11,
+    body: Platform.OS === 'ios' ? 14 : 14,
+    bodyLarge: Platform.OS === 'ios' ? 16 : 16,
+    h2: Platform.OS === 'ios' ? 18 : 20,
+    h1: Platform.OS === 'ios' ? 22 : 24,
   },
   weight: {
-    regular: "400" as const,
-    medium: "500" as const,
-    semibold: "600" as const,
-    bold: "700" as const,
+    regular: Platform.OS === 'ios' ? "400" as const : "normal" as const,
+    medium: Platform.OS === 'ios' ? "500" as const : "500" as const,
+    semibold: Platform.OS === 'ios' ? "600" as const : "600" as const,
+    bold: Platform.OS === 'ios' ? "700" as const : "bold" as const,
   },
   lineHeight: {
-    tight: 1.2,
-    normal: 1.4, // Slightly tighter for compact feel
-    relaxed: 1.6,
+    tight: Platform.OS === 'ios' ? 1.2 : 1.1,
+    normal: Platform.OS === 'ios' ? 1.4 : 1.3,
+    relaxed: Platform.OS === 'ios' ? 1.6 : 1.5,
   },
+  fontFamily: Platform.select({
+    ios: {
+      sans: 'System',
+      rounded: '.SF UI Rounded',
+      mono: 'Menlo',
+    },
+    android: {
+      sans: 'sans-serif',
+      rounded: 'sans-serif',
+      mono: 'monospace',
+    },
+    default: {
+      sans: 'system-ui',
+      rounded: 'system-ui', 
+      mono: 'monospace',
+    },
+  }),
 };
 
 // Compact border radius: platform optimized
