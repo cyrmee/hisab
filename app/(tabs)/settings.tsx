@@ -15,10 +15,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { createStyles } from "../../constants/styles";
 import { Colors, Spacing } from "../../constants/tokens";
 import { exportDataToJSON, importDataFromJSON } from "../../services/database";
+import { useColorScheme } from "../../hooks/use-color-scheme";
 
 export default function SettingsScreen() {
-  const styles = createStyles();
-  const colors = Colors.light;
+  const colorScheme = useColorScheme();
+  const styles = createStyles(colorScheme);
+  const colors = Colors[colorScheme];
 
   const [loading, setLoading] = useState(false);
 

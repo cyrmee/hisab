@@ -1,5 +1,7 @@
 // Design tokens for modern compact app styling
 
+import { Platform } from "react-native";
+
 export const Colors = {
   light: {
     // Primary brand colors
@@ -38,6 +40,50 @@ export const Colors = {
     tabActive: "#2563EB",
     tabInactive: "#94A3B8",
     tabBackground: "rgba(255, 255, 255, 0.95)",
+
+    // iOS specific colors
+    icon: Platform.OS === 'ios' ? '#007AFF' : '#687076',
+  },
+  dark: {
+    // Primary brand colors - adjusted for dark theme
+    primary: "#3B82F6", // Blue 500 (slightly brighter)
+    primaryLight: "#60A5FA", // Blue 400
+    primaryDark: "#2563EB", // Blue 600
+
+    // Secondary colors
+    secondary: "#34D399", // Emerald 400 (brighter)
+    secondaryLight: "#6EE7B7", // Emerald 300
+    secondaryDark: "#10B981", // Emerald 500
+
+    // Background colors - true dark theme
+    background: "#000000", // True black for iOS
+    backgroundSecondary: "#1C1C1E", // iOS dark secondary
+    surface: "#1C1C1E", // iOS card background
+    surfaceElevated: "#2C2C2E", // iOS elevated surface
+
+    // Text colors
+    text: "#FFFFFF", // White text
+    textSecondary: "#98989D", // iOS secondary text
+    textTertiary: "#636366", // iOS tertiary text
+    textInverse: "#000000", // Black text on light backgrounds
+
+    // Border colors
+    border: "#38383A", // iOS separator
+    borderSecondary: "#2C2C2E", // Subtle border
+
+    // Status colors - adjusted for dark
+    success: "#34D399", // Emerald 400
+    warning: "#FBBF24", // Amber 400
+    error: "#F87171", // Red 400
+    info: "#60A5FA", // Blue 400
+
+    // Tab bar - iOS dark style
+    tabActive: "#3B82F6",
+    tabInactive: "#8E8E93",
+    tabBackground: "rgba(28, 28, 30, 0.95)",
+
+    // iOS specific colors
+    icon: Platform.OS === 'ios' ? '#0A84FF' : '#9BA1A6',
   },
 };
 
@@ -72,38 +118,71 @@ export const Typography = {
   },
 };
 
-// Compact border radius: 8-12px
+// Compact border radius: platform optimized
 export const BorderRadius = {
-  sm: 6,
-  md: 8,
-  lg: 10,
-  xl: 12,
+  sm: Platform.OS === 'ios' ? 8 : 6,
+  md: Platform.OS === 'ios' ? 10 : 8,
+  lg: Platform.OS === 'ios' ? 12 : 10,
+  xl: Platform.OS === 'ios' ? 16 : 12,
   full: 9999,
 };
 
-// Subtle shadows for depth
+// Subtle shadows for depth - platform optimized
 export const Shadow = {
-  sm: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  md: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  lg: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
-  },
+  sm: Platform.select({
+    ios: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+    },
+    android: {
+      elevation: 2,
+    },
+    default: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+  }),
+  md: Platform.select({
+    ios: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.12,
+      shadowRadius: 4,
+    },
+    android: {
+      elevation: 4,
+    },
+    default: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+  }),
+  lg: Platform.select({
+    ios: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.16,
+      shadowRadius: 8,
+    },
+    android: {
+      elevation: 8,
+    },
+    default: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+  }),
 };
 
 // Fast, subtle animations

@@ -27,6 +27,7 @@ import {
   updateProduct,
   upsertCustomer,
 } from "../../services/database";
+import { useColorScheme } from "../../hooks/use-color-scheme";
 
 // Sale Item interface for building sales
 interface SaleItem {
@@ -75,8 +76,9 @@ function SalesItem({ item, onDelete, colors, styles }: SalesItemProps) {
 }
 
 export default function SalesScreen() {
-  const styles = createStyles();
-  const colors = Colors.light;
+  const colorScheme = useColorScheme();
+  const styles = createStyles(colorScheme);
+  const colors = Colors[colorScheme];
 
   const [transactions, setTransactions] = useState<TransactionWithCustomer[]>(
     []

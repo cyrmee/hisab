@@ -17,6 +17,7 @@ import { createStyles } from "../../constants/styles";
 import { BorderRadius, Colors, Spacing } from "../../constants/tokens";
 import { deleteProduct, getProducts, Product } from "../../services/database";
 import { getCurrentFilters } from "../../services/filter-store";
+import { useColorScheme } from "../../hooks/use-color-scheme";
 
 // Animated Product Item Component
 const AnimatedProductItem = memo(
@@ -147,8 +148,9 @@ export default function InventoryScreen() {
   const [loading, setLoading] = useState(false);
   const [quickSearch, setQuickSearch] = useState("");
 
-  const styles = createStyles();
-  const colors = Colors.light;
+  const colorScheme = useColorScheme();
+  const styles = createStyles(colorScheme);
+  const colors = Colors[colorScheme];
 
   const fetchProducts = React.useCallback(async () => {
     setLoading(true);

@@ -20,6 +20,7 @@ import {
   getCustomersWithBalance,
   updateCustomerBalance,
 } from "../../services/database";
+import { useColorScheme } from "../../hooks/use-color-scheme";
 
 interface CustomerItemProps {
   item: Customer;
@@ -58,8 +59,9 @@ function CustomerItem({ item, onPayment, colors, styles }: CustomerItemProps) {
 }
 
 export default function CustomersScreen() {
-  const styles = createStyles();
-  const colors = Colors.light;
+  const colorScheme = useColorScheme();
+  const styles = createStyles(colorScheme);
+  const colors = Colors[colorScheme];
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
