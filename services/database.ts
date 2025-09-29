@@ -516,3 +516,18 @@ export async function importDataFromJSON(jsonData: string): Promise<void> {
     throw new Error('Failed to import data');
   }
 }
+
+// Danger operation: clear all application data (products, customers, transactions)
+// NOTE: This intentionally preserves schema and autoincrement resets.
+export async function clearAllData(): Promise<void> {
+  try {
+    db.execSync('DELETE FROM transactions');
+    db.execSync('DELETE FROM customers');
+    db.execSync('DELETE FROM products');
+    db.execSync('DELETE FROM sqlite_sequence WHERE name IN ("products","customers","transactions")');
+    console.log('All data cleared successfully');
+  } catch (error) {
+    console.error('Error clearing all data:', error);
+    throw new Error('Failed to clear all data');
+  }
+}

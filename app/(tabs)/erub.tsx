@@ -1,26 +1,20 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
-import {
-  Alert,
-  FlatList,
-  Modal,
-  RefreshControl,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, FlatList, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ActivityIndicator, Button } from 'react-native-paper';
+import { BottomSheet } from '../../components/ui/bottom-sheet';
+import { useSnackbar } from '../../components/ui/snackbar-provider';
 import { createStyles } from "../../constants/styles";
-import { BorderRadius, Colors, Shadow, Spacing } from "../../constants/tokens";
+import { BorderRadius, Colors, Spacing } from "../../constants/tokens";
+import { useColorScheme } from "../../hooks/use-color-scheme";
 import {
   Customer,
   getCustomersWithBalance,
   updateCustomerBalance,
 } from "../../services/database";
-import { useColorScheme } from "../../hooks/use-color-scheme";
 
 interface CustomerItemProps {
   item: Customer;
@@ -66,11 +60,13 @@ export default function CustomersScreen() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentSheet, setShowPaymentSheet] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
   const [paymentAmount, setPaymentAmount] = useState("");
+
+  const { showSnackbar } = useSnackbar();
 
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
@@ -79,11 +75,11 @@ export default function CustomersScreen() {
       setCustomers(customersData);
     } catch (error) {
       console.error("Error fetching customers:", error);
-      Alert.alert("Error", "Failed to load customers");
+      showSnackbar({ message: 'Failed to load customers', type: 'error' });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showSnackbar]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -100,7 +96,7 @@ export default function CustomersScreen() {
   const handlePayment = (customer: Customer) => {
     setSelectedCustomer(customer);
     setPaymentAmount("");
-    setShowPaymentModal(true);
+    setShowPaymentSheet(true);
   };
 
   const processPayment = async () => {
@@ -141,18 +137,15 @@ export default function CustomersScreen() {
       // Subtract payment from customer balance (negative amount reduces balance)
       await updateCustomerBalance(customer.id, -amount);
 
-      Alert.alert(
-        "Success",
-        `Payment of $${amount.toFixed(2)} recorded for ${customer.name}`
-      );
+      showSnackbar({ message: `Payment of $${amount.toFixed(2)} recorded for ${customer.name}`, type: 'success' });
 
       // Refresh the list
       await fetchCustomers();
     } catch (error) {
       console.error("Error processing payment:", error);
-      Alert.alert("Error", "Failed to record payment");
+      showSnackbar({ message: 'Failed to record payment', type: 'error' });
     } finally {
-      setShowPaymentModal(false);
+      setShowPaymentSheet(false);
       setSelectedCustomer(null);
       setPaymentAmount("");
     }
@@ -209,7 +202,8 @@ export default function CustomersScreen() {
         {/* Customers List */}
         {loading && !refreshing ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>Loading customers...</Text>
+            <ActivityIndicator />
+            <Text style={[styles.emptyStateText, { marginTop: Spacing.sm }]}>Loading customers...</Text>
           </View>
         ) : customers.length === 0 ? (
           <View style={styles.emptyState}>
@@ -240,71 +234,26 @@ export default function CustomersScreen() {
             }}
           />
         )}
-
-        {/* Payment Modal */}
-        <Modal
-          visible={showPaymentModal}
-          animationType="fade"
-          transparent={true}
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: Spacing.lg,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: colors.background,
-                borderRadius: BorderRadius.lg,
-                padding: Spacing.lg,
-                width: "100%",
-                maxWidth: 400,
-                ...Shadow.lg,
-              }}
-            >
+        <BottomSheet visible={showPaymentSheet} onDismiss={() => setShowPaymentSheet(false)} snapPoint={0.55}>
+          <View style={{ paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }}>
+            <View style={[styles.flexRow, { justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg }]}>
               <Text style={styles.heading2}>Record Payment</Text>
-
-              <Text style={styles.body}>
-                Customer: {selectedCustomer?.name}
-              </Text>
-
-              <TextInput
-                style={[styles.input, { borderColor: colors.border }]}
-                placeholder="Enter payment amount"
-                placeholderTextColor={colors.textTertiary}
-                keyboardType="numeric"
-                value={paymentAmount}
-                onChangeText={setPaymentAmount}
-              />
-
-              <View style={styles.flexRow}>
-                <TouchableOpacity
-                  onPress={() => setShowPaymentModal(false)}
-                  style={[
-                    styles.buttonSecondary,
-                    { flex: 1, marginRight: Spacing.sm },
-                  ]}
-                >
-                  <Text style={[styles.body, { color: colors.textInverse }]}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={processPayment}
-                  style={[styles.buttonPrimary, { flex: 1 }]}
-                >
-                  <Text style={[styles.body, { color: colors.textInverse }]}>
-                    Confirm Payment
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              <Button onPress={() => setShowPaymentSheet(false)}>Cancel</Button>
             </View>
+            <Text style={[styles.bodySecondary, { marginBottom: Spacing.xs }]}>Customer</Text>
+            <Text style={[styles.body, { marginBottom: Spacing.md }]}>{selectedCustomer?.name}</Text>
+            <Text style={[styles.bodySecondary, { marginBottom: Spacing.xs }]}>Amount</Text>
+            <TextInput
+              style={[styles.inputCompact, { marginBottom: Spacing.lg }]}
+              placeholder="Enter payment amount"
+              placeholderTextColor={colors.textTertiary}
+              keyboardType="numeric"
+              value={paymentAmount}
+              onChangeText={setPaymentAmount}
+            />
+            <Button mode='contained' onPress={processPayment}>Confirm Payment</Button>
           </View>
-        </Modal>
+        </BottomSheet>
       </View>
     </SafeAreaView>
   );

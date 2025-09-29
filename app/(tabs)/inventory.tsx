@@ -1,144 +1,80 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { Link, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import React, { memo, useRef, useState } from "react";
-import {
-  Alert,
-  Animated,
-  FlatList,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Animated, FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Button, FAB, IconButton, List } from 'react-native-paper';
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BottomSheet } from "../../components/ui/bottom-sheet";
+import { ProductFilterSheet } from "../../components/ui/product-filter-sheet";
 import { createStyles } from "../../constants/styles";
-import { BorderRadius, Colors, Spacing } from "../../constants/tokens";
-import { deleteProduct, getProducts, Product } from "../../services/database";
-import { getCurrentFilters } from "../../services/filter-store";
+import { Colors, Spacing } from "../../constants/tokens";
 import { useColorScheme } from "../../hooks/use-color-scheme";
+import { addProduct, deleteProduct, getProducts, Product, updateProduct } from "../../services/database";
+import { getCurrentFilters } from "../../services/filter-store";
+
+// Local product form state structure
+interface EditingProduct {
+  id?: number;
+  name: string;
+  salePrice: string;
+  quantity: string;
+  createdAt?: number;
+  updatedAt?: number;
+}
 
 // Animated Product Item Component
-const AnimatedProductItem = memo(
-  ({
-    item,
-    onDelete,
-    colors,
-    styles,
-  }: {
-    item: Product;
-    onDelete: (product: Product) => void;
-    colors: any;
-    styles: any;
-  }) => {
-    const animatedValue = useRef(new Animated.Value(1)).current;
+const AnimatedProductItem = memo(({ item, onDelete, onEdit, colors, styles }: {
+  item: Product;
+  onDelete: (product: Product) => void;
+  onEdit: (p: Product) => void;
+  colors: any;
+  styles: any;
+}) => {
+  const animatedValue = useRef(new Animated.Value(1)).current;
 
-    const handlePressIn = () => {
-      Animated.timing(animatedValue, {
-        toValue: 0.98,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-    };
+  const handlePressIn = () => {
+    Animated.timing(animatedValue, {
+      toValue: 0.98,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  };
 
-    const handlePressOut = () => {
-      Animated.timing(animatedValue, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-    };
+  const handlePressOut = () => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  };
 
-    const formatDate = (timestamp: number) => {
-      return new Date(timestamp * 1000).toLocaleDateString();
-    };
+  // date formatting removed for leaner list row; can be re-added if needed
 
-    return (
-      <Animated.View
-        style={[
-          styles.listItemCompact,
-          {
-            transform: [{ scale: animatedValue }],
-          },
-        ]}
+  return (
+    <Animated.View style={[styles.listItemCompact, { transform: [{ scale: animatedValue }], paddingVertical: 10 }]}>
+      <Pressable
+        android_ripple={{ color: colors.borderSecondary }}
+        onPress={() => onEdit(item)}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={{ flex: 1 }}
       >
-        {/* Left side - Product details */}
-        <View style={{ flex: 1 }}>
-          <Text style={styles.heading3} numberOfLines={1}>
-            {item.name}
-          </Text>
-          <View style={[styles.flexRow, { marginTop: 2 }]}>
-            <Text style={[styles.body, { color: colors.success }]}>
-              ${item.salePrice.toFixed(2)}
-            </Text>
-            <Text style={[styles.bodySecondary, { marginLeft: Spacing.md }]}>
-              Stock: {item.quantity}
-            </Text>
-          </View>
-          {item.createdAt && (
-            <Text style={[styles.caption, { marginTop: 2 }]}>
-              Added: {formatDate(item.createdAt)}
-            </Text>
+        <List.Item
+          title={item.name}
+          description={`$${item.salePrice.toFixed(2)}  •  Stock: ${item.quantity}`}
+          right={() => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <IconButton icon="pencil" onPress={() => onEdit(item)} size={18} iconColor={colors.warning} />
+              <IconButton icon="delete" onPress={() => onDelete(item)} size={18} iconColor={colors.error} />
+            </View>
           )}
-        </View>
-
-        {/* Right side - Action buttons */}
-        <View style={styles.flexRow}>
-          <Pressable
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            style={[
-              styles.buttonSecondary,
-              {
-                paddingVertical: Spacing.sm,
-                paddingHorizontal: Spacing.sm,
-                marginLeft: Spacing.md,
-                borderColor: colors.warning,
-                minWidth: 36,
-                minHeight: 36,
-              },
-            ]}
-          >
-            <Link
-              href={{
-                pathname: "/product-form",
-                params: {
-                  productId: item.id.toString(),
-                  name: item.name,
-                  salePrice: item.salePrice.toString(),
-                  quantity: item.quantity.toString(),
-                  createdAt: item.createdAt.toString(),
-                  updatedAt: item.updatedAt.toString(),
-                },
-              }}
-              asChild
-            >
-              <FontAwesome name="edit" size={14} color={colors.warning} />
-            </Link>
-          </Pressable>
-          <Pressable
-            onPress={() => onDelete(item)}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            style={[
-              styles.buttonSecondary,
-              {
-                paddingVertical: Spacing.sm,
-                paddingHorizontal: Spacing.sm,
-                marginLeft: Spacing.md,
-                borderColor: colors.error,
-                minWidth: 36,
-                minHeight: 36,
-              },
-            ]}
-          >
-            <FontAwesome name="trash" size={14} color={colors.error} />
-          </Pressable>
-        </View>
-      </Animated.View>
-    );
-  }
+          style={{ paddingVertical: 0 }}
+        />
+      </Pressable>
+    </Animated.View>
+  );
+}
 );
 
 AnimatedProductItem.displayName = "AnimatedProductItem";
@@ -147,6 +83,10 @@ export default function InventoryScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [quickSearch, setQuickSearch] = useState("");
+  const [showProductSheet, setShowProductSheet] = useState(false);
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<EditingProduct | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const colorScheme = useColorScheme();
   const styles = createStyles(colorScheme);
@@ -159,8 +99,8 @@ export default function InventoryScreen() {
       const allProducts = await getProducts(filters);
       const filteredProducts = quickSearch
         ? allProducts.filter((product) =>
-            product.name.toLowerCase().includes(quickSearch.toLowerCase())
-          )
+          product.name.toLowerCase().includes(quickSearch.toLowerCase())
+        )
         : allProducts;
       setProducts(filteredProducts);
     } catch (error) {
@@ -200,10 +140,48 @@ export default function InventoryScreen() {
     );
   };
 
+  const handleEditProduct = (p?: Product) => {
+    if (p) {
+      setEditingProduct({
+        id: p.id,
+        name: p.name,
+        salePrice: p.salePrice.toString(),
+        quantity: p.quantity.toString(),
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+      });
+    } else {
+      setEditingProduct({ name: '', salePrice: '', quantity: '' });
+    }
+    setShowProductSheet(true);
+  };
+
+  const handleSaveProduct = async () => {
+    if (!editingProduct) return;
+    const { id, name, salePrice, quantity } = editingProduct;
+    if (!name.trim()) { Alert.alert('Validation', 'Name required'); return; }
+    const priceNum = parseFloat(salePrice);
+    const qtyNum = parseInt(quantity);
+    if (isNaN(priceNum) || isNaN(qtyNum)) { Alert.alert('Validation', 'Numeric values invalid'); return; }
+    setSaving(true);
+    try {
+      if (id) {
+        await updateProduct(id, name.trim(), priceNum, qtyNum);
+      } else {
+        await addProduct(name.trim(), priceNum, qtyNum);
+      }
+      setShowProductSheet(false);
+      await fetchProducts();
+    } catch {
+      Alert.alert('Error', 'Failed to save product');
+    } finally { setSaving(false); }
+  };
+
   const renderItem = ({ item }: { item: Product }) => (
     <AnimatedProductItem
       item={item}
       onDelete={handleDeleteProduct}
+      onEdit={handleEditProduct}
       colors={colors}
       styles={styles}
     />
@@ -236,12 +214,14 @@ export default function InventoryScreen() {
               placeholder="Quick search products..."
               placeholderTextColor={colors.textTertiary}
             />
+            <IconButton icon="filter-variant" onPress={() => setShowFilterSheet(true)} accessibilityLabel="Filters" />
           </View>
 
           {/* Products List */}
           {loading ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>Loading products...</Text>
+              <ActivityIndicator />
+              <Text style={[styles.emptyStateText, { marginTop: 8 }]}>Loading products...</Text>
             </View>
           ) : products.length === 0 ? (
             <View style={styles.emptyState}>
@@ -256,47 +236,9 @@ export default function InventoryScreen() {
               </Text>
               {!quickSearch && Object.keys(getCurrentFilters()).length <= 2 && (
                 <View style={{ alignItems: "center", marginTop: Spacing.lg }}>
-                  <Link href="/product-form" asChild>
-                    <TouchableOpacity
-                      style={[
-                        styles.buttonPrimary,
-                        { marginBottom: Spacing.md },
-                      ]}
-                    >
-                      <Text style={styles.buttonText}>Add Product</Text>
-                    </TouchableOpacity>
-                  </Link>
-
-                  {/* FAB positioned here for testing visibility */}
-                  <Link href="/product-form" asChild>
-                    <Pressable
-                      style={({ pressed }) => [
-                        {
-                          backgroundColor: colors.primary,
-                          width: 56,
-                          height: 56,
-                          borderRadius: BorderRadius.lg,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          shadowColor: colors.primary,
-                          shadowOffset: { width: 0, height: 4 },
-                          shadowOpacity: 0.3,
-                          shadowRadius: 8,
-                          elevation: 8,
-                        },
-                        pressed && {
-                          transform: [{ scale: 0.95 }],
-                          opacity: 0.9,
-                        },
-                      ]}
-                    >
-                      <FontAwesome
-                        name="plus"
-                        size={20}
-                        color={colors.textInverse}
-                      />
-                    </Pressable>
-                  </Link>
+                  <Button mode="contained" onPress={() => handleEditProduct()} icon="plus">
+                    Add Product
+                  </Button>
                 </View>
               )}
             </View>
@@ -313,53 +255,70 @@ export default function InventoryScreen() {
           )}
         </View>
       </SafeAreaView>
+      <FAB icon="plus" style={{ position: 'absolute', bottom: 24, right: 24 }} onPress={() => handleEditProduct()} />
 
-      {/* Floating Action Button - Positioned above tab bar and content */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 20,
-          right: 20,
-          zIndex: 9999,
+      {/* Product Form Bottom Sheet */}
+      <BottomSheet visible={showProductSheet} onDismiss={() => setShowProductSheet(false)}>
+        <View style={{ padding: 20, gap: 16 }}>
+          <Text style={styles.heading2}>{editingProduct?.id ? 'Edit Product' : 'Add Product'}</Text>
+          <View>
+            <Text style={styles.bodySecondary}>Name</Text>
+            <TextInput
+              style={styles.inputCompact}
+              value={editingProduct?.name || ''}
+              onChangeText={(v) => setEditingProduct(p => p ? { ...p, name: v } : { name: v, salePrice: '', quantity: '' })}
+              placeholder="Product name"
+            />
+            {(!editingProduct?.name || editingProduct.name.trim().length < 2) && (
+              <Text style={[styles.caption, { color: colors.error, marginTop: 4 }]}>Name is required (min 2 chars)</Text>
+            )}
+          </View>
+          <View style={styles.flexRow}>
+            <View style={{ flex: 1, marginRight: 8 }}>
+              <Text style={styles.bodySecondary}>Price</Text>
+              <TextInput
+                style={styles.inputCompact}
+                value={editingProduct?.salePrice || ''}
+                onChangeText={(v) => setEditingProduct(p => p ? { ...p, salePrice: v } : { name: '', salePrice: v, quantity: '' })}
+                keyboardType="decimal-pad"
+                placeholder="0.00"
+              />
+              {!!editingProduct?.salePrice && isNaN(parseFloat(editingProduct.salePrice)) && (
+                <Text style={[styles.caption, { color: colors.error, marginTop: 4 }]}>Invalid price</Text>
+              )}
+            </View>
+            <View style={{ flex: 1, marginLeft: 8 }}>
+              <Text style={styles.bodySecondary}>Quantity</Text>
+              <TextInput
+                style={styles.inputCompact}
+                value={editingProduct?.quantity || ''}
+                onChangeText={(v) => setEditingProduct(p => p ? { ...p, quantity: v } : { name: '', salePrice: '', quantity: v })}
+                keyboardType="number-pad"
+                placeholder="0"
+              />
+              {!!editingProduct?.quantity && isNaN(parseInt(editingProduct.quantity)) && (
+                <Text style={[styles.caption, { color: colors.error, marginTop: 4 }]}>Invalid quantity</Text>
+              )}
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12 }}>
+            <Button mode="text" onPress={() => setShowProductSheet(false)}>Cancel</Button>
+            <Button
+              mode="contained"
+              loading={saving}
+              disabled={!editingProduct || !editingProduct.name.trim() || editingProduct.name.trim().length < 2 || isNaN(parseFloat(editingProduct.salePrice)) || isNaN(parseInt(editingProduct.quantity))}
+              onPress={handleSaveProduct}
+            >
+              {editingProduct?.id ? 'Update' : 'Add'}
+            </Button>
+          </View>
+        </View>
+      </BottomSheet>
 
-          // Circle styles on wrapper
-          backgroundColor: colors.primary,
-          width: 56,
-          height: 56,
-          borderRadius: BorderRadius.lg,
-          alignItems: "center",
-          justifyContent: "center",
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8,
-          borderWidth: 0,
-          borderColor: colors.primary,
-        }}
-      >
-        <Pressable
-          android_ripple={{ color: colors.primary, radius: 28 }}
-          style={({ pressed }) => [
-            {
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: BorderRadius.lg,
-            },
-            pressed && {
-              transform: [{ scale: 0.95 }],
-              opacity: 0.9,
-            },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Add product"
-        >
-          <Link href="/product-form" asChild>
-            <FontAwesome name="plus" size={15} color={colors.textInverse} />
-          </Link>
-        </Pressable>
-      </View>
+      {/* Filter Bottom Sheet */}
+      <BottomSheet visible={showFilterSheet} onDismiss={() => setShowFilterSheet(false)} snapPoint={0.85}>
+        <ProductFilterSheet onClose={() => setShowFilterSheet(false)} onApply={fetchProducts} />
+      </BottomSheet>
     </>
   );
 }

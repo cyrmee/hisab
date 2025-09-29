@@ -1,28 +1,73 @@
-import { FontAwesome } from "@expo/vector-icons";
-import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
-import React, { useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Share,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, Share, Text, View } from 'react-native';
+import { ActivityIndicator, Divider, List, Switch } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { createStyles } from "../../constants/styles";
-import { Colors, Spacing } from "../../constants/tokens";
-import { exportDataToJSON, importDataFromJSON } from "../../services/database";
-import { useColorScheme } from "../../hooks/use-color-scheme";
+import { useSnackbar } from '../../components/ui/snackbar-provider';
+import { createStyles } from '../../constants/styles';
+import { Spacing } from '../../constants/tokens';
+import { useColorScheme } from '../../hooks/use-color-scheme';
+import { clearAllData, exportDataToJSON, importDataFromJSON } from '../../services/database';
+import { loadPreferences, savePreferences } from '../../services/preferences';
 
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const styles = createStyles(colorScheme);
-  const colors = Colors[colorScheme];
+  // colors retained via styles & theme usage (direct Colors not needed now)
 
   const [loading, setLoading] = useState(false);
+  const [autoBackup, setAutoBackup] = useState(false);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const { showSnackbar } = useSnackbar();
+
+  // Load preferences on mount
+  useEffect(() => {
+    (async () => {
+      const prefs = await loadPreferences();
+      setAutoBackup(prefs.autoBackup);
+      setAnalyticsEnabled(prefs.analyticsEnabled);
+    })();
+  }, []);
+
+  const updateAutoBackup = async (value: boolean) => {
+    setAutoBackup(value);
+    await savePreferences({ autoBackup: value });
+    showSnackbar({ message: `Auto backup ${value ? 'enabled' : 'disabled'}` });
+  };
+
+  const updateAnalytics = async (value: boolean) => {
+    setAnalyticsEnabled(value);
+    await savePreferences({ analyticsEnabled: value });
+    showSnackbar({ message: `Analytics ${value ? 'enabled' : 'disabled'}` });
+  };
+
+  const handleClearAllConfirm = () => {
+    Alert.alert('Clear All Data', 'This will permanently delete all products, sales and customer records. Continue?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Continue', style: 'destructive', onPress: handleClearAllSecond }
+    ]);
+  };
+
+  const handleClearAllSecond = () => {
+    Alert.alert('Are you sure?', 'This cannot be undone. Tap DELETE EVERYTHING to proceed.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'DELETE EVERYTHING', style: 'destructive', onPress: clearAll }
+    ]);
+  };
+
+  const clearAll = async () => {
+    setLoading(true);
+    try {
+      await clearAllData();
+      showSnackbar({ message: 'All data cleared', type: 'success' });
+    } catch {
+      showSnackbar({ message: 'Failed to clear data', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDataBackup = async () => {
     setLoading(true);
@@ -36,7 +81,7 @@ export default function SettingsScreen() {
       });
     } catch (error) {
       console.error("Backup error:", error);
-      Alert.alert("Error", "Failed to create backup");
+      showSnackbar({ message: 'Failed to create backup', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -67,13 +112,10 @@ export default function SettingsScreen() {
               );
               await importDataFromJSON(fileContent);
 
-              Alert.alert("Success", "Data imported successfully");
+              showSnackbar({ message: 'Data imported successfully', type: 'success' });
             } catch (error) {
               console.error("Import error:", error);
-              Alert.alert(
-                "Error",
-                "Failed to import data. Please check the file format."
-              );
+              showSnackbar({ message: 'Failed to import data (check file format)', type: 'error' });
             } finally {
               setLoading(false);
             }
@@ -82,49 +124,6 @@ export default function SettingsScreen() {
       ]
     );
   };
-
-  const SettingItem = ({
-    icon,
-    title,
-    description,
-    onPress,
-    rightElement,
-  }: {
-    icon: string;
-    title: string;
-    description?: string;
-    onPress?: () => void;
-    rightElement?: React.ReactNode;
-  }) => (
-    <TouchableOpacity
-      style={[styles.listItemCompact, { marginBottom: Spacing.md }]}
-      onPress={onPress}
-      disabled={!onPress}
-    >
-      <View style={styles.flexRow}>
-        <FontAwesome
-          name={icon as any}
-          size={24}
-          color={colors.primary}
-          style={{ marginRight: Spacing.md }}
-        />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.body}>{title}</Text>
-          {description && (
-            <Text style={styles.bodySecondary}>{description}</Text>
-          )}
-        </View>
-        {rightElement ||
-          (onPress && (
-            <FontAwesome
-              name="chevron-right"
-              size={16}
-              color={colors.textTertiary}
-            />
-          ))}
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -138,31 +137,51 @@ export default function SettingsScreen() {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Data Management Section */}
-          <View style={{ marginBottom: Spacing.lg }}>
-            <Text style={[styles.heading3, { marginBottom: Spacing.md }]}>
-              Data Management
-            </Text>
-
-            <SettingItem
-              icon="download"
+          <List.Section>
+            <List.Subheader>Data</List.Subheader>
+            <List.Item
               title="Backup Data"
               description="Export all your data to a JSON file"
+              left={(props: any) => <List.Icon {...props} icon="download" />}
               onPress={handleDataBackup}
             />
-
-            <SettingItem
-              icon="upload"
+            <List.Item
               title="Import Data"
               description="Replace current data with backup file"
+              left={(props: any) => <List.Icon {...props} icon="upload" />}
               onPress={handleDataImport}
             />
-          </View>
-
-          {/* Loading indicator */}
+          </List.Section>
+          <Divider />
+          <List.Section>
+            <List.Subheader>Preferences</List.Subheader>
+            <List.Item
+              title="Automatic Backups"
+              description="Periodically export data (local only)"
+              left={(p: any) => <List.Icon {...p} icon="content-save" />}
+              right={() => <Switch value={autoBackup} onValueChange={updateAutoBackup} />}
+            />
+            <List.Item
+              title="Analytics"
+              description="Anonymous usage metrics"
+              left={(p: any) => <List.Icon {...p} icon="chart-bar" />}
+              right={() => <Switch value={analyticsEnabled} onValueChange={updateAnalytics} />}
+            />
+          </List.Section>
+          <Divider />
+          <List.Section>
+            <List.Subheader>Danger Zone</List.Subheader>
+            <List.Item
+              title="Clear All Data"
+              description="Remove all products, sales and customers"
+              left={(p: any) => <List.Icon {...p} icon="delete" />}
+              onPress={handleClearAllConfirm}
+            />
+          </List.Section>
           {loading && (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>Processing...</Text>
+            <View style={{ padding: Spacing.lg, alignItems: 'center' }}>
+              <ActivityIndicator />
+              <Text style={[styles.bodySecondary, { marginTop: Spacing.sm }]}>Processing...</Text>
             </View>
           )}
         </ScrollView>
