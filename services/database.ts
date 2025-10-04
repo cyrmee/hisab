@@ -78,8 +78,6 @@ export async function initializeDatabase() {
     } catch {
       // Columns already exist, ignore error
     }
-
-    console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
     throw new Error('Failed to initialize database');
@@ -90,8 +88,7 @@ export async function initializeDatabase() {
 export function testDatabase(): boolean {
   try {
     // Simple test query
-    const result = db.getAllSync('SELECT name FROM sqlite_master WHERE type="table"');
-    console.log('Database tables:', result);
+    db.getAllSync('SELECT name FROM sqlite_master WHERE type="table"');
     return true;
   } catch (error) {
     console.error('Database test failed:', error);
@@ -164,8 +161,6 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Product
 
     // Add sorting
     query += ` ORDER BY ${sortBy} ${sortOrder}`;
-
-    console.log('Executing query:', query, 'with params:', params);
     
     // Use prepared statements for better performance and safety
     if (params.length > 0) {
@@ -497,7 +492,7 @@ export async function importDataFromJSON(jsonData: string): Promise<void> {
     // Import transactions
     for (const transaction of data.transactions) {
       const statement = db.prepareSync(
-        'INSERT INTO transactions (timestamp, totalAmount, isCreditSale, customerId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO transaction(timestamp, totalAmount, isCreditSale, customerId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)'
       );
       statement.executeSync([
         transaction.timestamp,
@@ -510,7 +505,6 @@ export async function importDataFromJSON(jsonData: string): Promise<void> {
       statement.finalizeSync();
     }
 
-    console.log('Data imported successfully');
   } catch (error) {
     console.error('Error importing data:', error);
     throw new Error('Failed to import data');

@@ -15,16 +15,12 @@ export default function RootLayout() {
   useEffect(() => {
     const setupDatabase = async () => {
       try {
-        console.log("Testing database connection...");
         const isWorking = testDatabase();
         if (!isWorking) {
-          console.error("Database test failed");
           return;
         }
 
-        console.log("Initializing database...");
         await initializeDatabase();
-        console.log("Database setup completed");
       } catch (error) {
         console.error("Database setup failed:", error);
       }
